@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Send, Copy, Check, ChevronDown, Edit3, Eye } from 'lucide-react';
+import { Send, Copy, Check, ChevronDown, Edit3, Eye, Calendar, Link2, Loader2 } from 'lucide-react';
 import { Button, Modal, Textarea, Select } from '../ui';
 import {
   subscribeToTemplates,
@@ -10,6 +10,7 @@ import {
   TEMPLATE_CATEGORIES,
   AVAILABLE_PLACEHOLDERS
 } from '../../lib/whatsapp';
+import { createBookingLink, generateBookingMessage } from '../../lib/bookingLinks';
 import './WhatsAppModal.css';
 
 /**
@@ -29,6 +30,13 @@ export default function WhatsAppModal({
   const [isPreview, setIsPreview] = useState(true);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  // Booking link state
+  const [showBookingOptions, setShowBookingOptions] = useState(false);
+  const [bookingType, setBookingType] = useState('interview');
+  const [bookingLocation, setBookingLocation] = useState('');
+  const [generatingLink, setGeneratingLink] = useState(false);
+  const [bookingLink, setBookingLink] = useState(null);
 
   // Subscribe to templates
   useEffect(() => {
@@ -67,12 +75,54 @@ export default function WhatsAppModal({
       setMessage('');
       setIsPreview(true);
       setCopied(false);
+      setShowBookingOptions(false);
+      setBookingLink(null);
+      setBookingType('interview');
+      setBookingLocation('');
     }
   }, [isOpen]);
 
   // Handle template selection
   const handleTemplateSelect = (templateId) => {
     setSelectedTemplateId(templateId);
+    setShowBookingOptions(false);
+    setBookingLink(null);
+  };
+
+  // Handle booking invite
+  const handleGenerateBookingLink = async () => {
+    if (!candidate) return;
+    
+    setGeneratingLink(true);
+    try {
+      const link = await createBookingLink({
+        candidateId: candidate.id,
+        candidateName: `${candidate.firstName} ${candidate.lastName}`,
+        type: bookingType,
+        jobId: additionalData.jobId || null,
+        jobTitle: additionalData.jobTitle || null,
+        location: bookingLocation || null,
+      });
+      
+      setBookingLink(link);
+      
+      // Generate message with booking link
+      const bookingMessage = generateBookingMessage({
+        candidateName: `${candidate.firstName} ${candidate.lastName}`,
+        type: bookingType,
+        jobTitle: additionalData.jobTitle || null,
+        location: bookingLocation || null,
+        bookingUrl: link.url
+      });
+      
+      setMessage(bookingMessage);
+      setSelectedTemplateId('');
+    } catch (err) {
+      console.error('Error generating booking link:', err);
+      alert('Failed to generate booking link. Please try again.');
+    } finally {
+      setGeneratingLink(false);
+    }
   };
 
   // Handle send via WhatsApp
@@ -92,6 +142,17 @@ export default function WhatsAppModal({
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
+    }
+  };
+
+  // Copy just the booking link
+  const handleCopyLink = async () => {
+    if (!bookingLink) return;
+    try {
+      await navigator.clipboard.writeText(bookingLink.url);
+      alert('Booking link copied!');
+    } catch (err) {
+      console.error('Failed to copy link:', err);
     }
   };
 
@@ -161,6 +222,95 @@ export default function WhatsAppModal({
           </div>
         </div>
 
+        {/* Quick Actions - Booking Invites */}
+        <div className="whatsapp-quick-actions">
+          <label className="whatsapp-label">Quick Actions</label>
+          <div className="whatsapp-quick-btns">
+            <button 
+              className={`whatsapp-quick-btn ${showBookingOptions && bookingType === 'interview' ? 'active' : ''}`}
+              onClick={() => {
+                setShowBookingOptions(true);
+                setBookingType('interview');
+                setSelectedTemplateId('');
+              }}
+            >
+              <Calendar size={16} />
+              Invite to Interview
+            </button>
+            <button 
+              className={`whatsapp-quick-btn ${showBookingOptions && bookingType === 'trial' ? 'active' : ''}`}
+              onClick={() => {
+                setShowBookingOptions(true);
+                setBookingType('trial');
+                setSelectedTemplateId('');
+              }}
+            >
+              <Calendar size={16} />
+              Invite to Trial
+            </button>
+          </div>
+        </div>
+
+        {/* Booking Options */}
+        {showBookingOptions && (
+          <div className="whatsapp-booking-options">
+            <div className="booking-option-row">
+              <div className="booking-option-field">
+                <label>Type</label>
+                <select 
+                  value={bookingType} 
+                  onChange={(e) => setBookingType(e.target.value)}
+                >
+                  <option value="interview">Interview</option>
+                  <option value="trial">Trial Shift</option>
+                </select>
+              </div>
+              <div className="booking-option-field">
+                <label>Location (optional)</label>
+                <input 
+                  type="text"
+                  value={bookingLocation}
+                  onChange={(e) => setBookingLocation(e.target.value)}
+                  placeholder="e.g., Manchester Branch"
+                />
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleGenerateBookingLink}
+              disabled={generatingLink}
+              leftIcon={generatingLink ? <Loader2 size={16} className="spinning" /> : <Link2 size={16} />}
+            >
+              {generatingLink ? 'Generating...' : 'Generate Booking Link'}
+            </Button>
+
+            {bookingLink && (
+              <div className="booking-link-generated">
+                <div className="booking-link-success">
+                  <Check size={16} />
+                  Booking link created!
+                </div>
+                <div className="booking-link-url">
+                  <code>{bookingLink.url}</code>
+                  <button onClick={handleCopyLink}>
+                    <Copy size={14} />
+                  </button>
+                </div>
+                <p className="booking-link-expiry">
+                  Expires: {bookingLink.expiresAt.toLocaleDateString('en-GB')}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Divider */}
+        {showBookingOptions && (
+          <div className="whatsapp-divider">
+            <span>or choose a template</span>
+          </div>
+        )}
+
         {/* Template Selection */}
         <div className="whatsapp-templates-section">
           <div className="whatsapp-templates-header">
@@ -226,7 +376,7 @@ export default function WhatsAppModal({
           {isPreview ? (
             <div 
               className="whatsapp-message-preview"
-              dangerouslySetInnerHTML={{ __html: getPreviewMessage().replace(/\n/g, '<br>') }}
+              dangerouslySetInnerHTML={{ __html: (bookingLink ? message : getPreviewMessage()).replace(/\n/g, '<br>') }}
             />
           ) : (
             <Textarea
@@ -239,7 +389,7 @@ export default function WhatsAppModal({
         </div>
 
         {/* Placeholders Help */}
-        {!isPreview && (
+        {!isPreview && !bookingLink && (
           <div className="whatsapp-placeholders-help">
             <span className="whatsapp-placeholders-label">Available placeholders:</span>
             <div className="whatsapp-placeholders-list">

@@ -8,14 +8,16 @@ import Candidates from './pages/Candidates';
 import CandidateDetail from './pages/CandidateDetail';
 import Jobs from './pages/Jobs';
 import Settings from './pages/Settings';
+import BookingPage from './pages/BookingPage';
 
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/Recruitment">
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/book/:token" element={<BookingPage />} />
           
           {/* Protected routes */}
           <Route 

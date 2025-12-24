@@ -1,0 +1,343 @@
+/* Booking Availability Settings */
+
+.availability-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.availability-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.availability-tab:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.availability-tab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.availability-card {
+  margin-bottom: var(--space-4);
+}
+
+.availability-card h3 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.availability-hint {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-4);
+}
+
+/* General Settings */
+.availability-general {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.availability-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.availability-toggle input {
+  display: none;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--color-gray-300);
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle-slider.small {
+  width: 36px;
+  height: 20px;
+}
+
+.toggle-slider.small::after {
+  width: 16px;
+  height: 16px;
+}
+
+.availability-toggle input:checked + .toggle-slider {
+  background: var(--color-primary);
+}
+
+.availability-toggle input:checked + .toggle-slider::after {
+  transform: translateX(20px);
+}
+
+.availability-toggle input:checked + .toggle-slider.small::after {
+  transform: translateX(16px);
+}
+
+.toggle-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.availability-options {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.availability-option {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.availability-option label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.availability-option select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  background: var(--bg-primary);
+  min-width: 180px;
+}
+
+/* Weekly Schedule */
+.availability-days {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.availability-day {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+}
+
+.availability-day.disabled {
+  background: var(--color-gray-50);
+}
+
+.day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.day-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.day-toggle input {
+  display: none;
+}
+
+.day-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.day-unavailable {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.day-slots {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.time-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.time-slot input[type="time"] {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  background: var(--bg-primary);
+}
+
+.slot-separator {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.slot-remove {
+  padding: var(--space-2);
+  background: none;
+  border: none;
+  color: var(--color-gray-400);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.slot-remove:hover {
+  background: var(--color-danger-50);
+  color: var(--color-danger);
+}
+
+.add-slot-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  width: fit-content;
+}
+
+.add-slot-btn:hover {
+  text-decoration: underline;
+}
+
+/* Excluded Dates */
+.excluded-dates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.add-excluded-date {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.add-excluded-date input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.excluded-dates-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.excluded-date-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-gray-100);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}
+
+.excluded-date-item button {
+  padding: var(--space-1);
+  background: none;
+  border: none;
+  color: var(--color-gray-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.excluded-date-item button:hover {
+  color: var(--color-danger);
+}
+
+.no-excluded-dates {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* Save Actions */
+.availability-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-primary);
+}
+
+.save-success {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-success);
+  font-size: var(--text-sm);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .availability-tabs {
+    flex-direction: column;
+  }
+
+  .availability-options {
+    flex-direction: column;
+  }
+
+  .time-slot {
+    flex-wrap: wrap;
+  }
+
+  .add-excluded-date {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

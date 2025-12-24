@@ -11,13 +11,16 @@ import {
   MessageSquare,
   ChevronRight,
   Key,
-  Sparkles
+  Sparkles,
+  Calendar
 } from 'lucide-react';
 import { Card, CardBody, Button, Input } from '../../components/ui';
 import Header from '../../components/layout/Header';
 import WhatsAppTemplates from './WhatsAppTemplates';
+import BookingAvailability from './BookingAvailability';
 import { storeApiKey, clearApiKey, hasApiKey } from '../../lib/cvParser';
 import './Settings.css';
+import './BookingAvailability.css';
 
 const settingSections = [
   {
@@ -25,6 +28,12 @@ const settingSections = [
     icon: MessageSquare,
     title: 'WhatsApp Templates',
     description: 'Manage message templates for candidate communication'
+  },
+  {
+    id: 'booking',
+    icon: Calendar,
+    title: 'Booking Availability',
+    description: 'Set available times for interviews and trial shifts'
   },
   {
     id: 'ai-parsing',
@@ -181,6 +190,8 @@ export default function Settings() {
     switch (activeSection) {
       case 'whatsapp':
         return <WhatsAppTemplates />;
+      case 'booking':
+        return <BookingAvailability />;
       case 'ai-parsing':
         return renderAIParsingSettings();
       default:
