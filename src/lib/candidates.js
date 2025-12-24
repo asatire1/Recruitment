@@ -4,6 +4,7 @@ import {
   addDoc, 
   getDoc, 
   getDocs, 
+  getCountFromServer,
   updateDoc, 
   deleteDoc,
   query, 
@@ -11,10 +12,12 @@ import {
   orderBy, 
   serverTimestamp,
   onSnapshot,
-  limit
+  limit,
+  startAfter
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from './firebase';
+import { sanitizeCandidateData, sanitizeNoteContent, containsSuspiciousContent } from './sanitize';
 
 /**
  * Firestore Candidate Schema
@@ -122,22 +125,30 @@ export async function deleteCV(storagePath) {
 export async function createCandidate(candidateData, userId) {
   const candidatesRef = collection(db, CANDIDATES_COLLECTION);
   
+  // Sanitise user inputs
+  const sanitized = sanitizeCandidateData(candidateData);
+  
+  // Log if suspicious content detected (for monitoring)
+  if (containsSuspiciousContent(JSON.stringify(candidateData))) {
+    console.warn('Suspicious content detected in candidate data, sanitising...');
+  }
+  
   const candidate = {
-    firstName: candidateData.firstName,
-    lastName: candidateData.lastName,
-    email: candidateData.email,
-    phone: candidateData.phone,
-    address: candidateData.address || null,
-    postcode: candidateData.postcode || null,
+    firstName: sanitized.firstName,
+    lastName: sanitized.lastName,
+    email: sanitized.email,
+    phone: sanitized.phone,
+    address: sanitized.address || null,
+    postcode: sanitized.postcode || null,
     status: 'new',
-    jobId: candidateData.jobId || null,
-    jobTitle: candidateData.jobTitle || null,
-    cvUrl: candidateData.cvUrl || null,
+    jobId: candidateData.jobId || null, // ID, not user input
+    jobTitle: candidateData.jobTitle || null, // From job record, already validated
+    cvUrl: candidateData.cvUrl || null, // System generated
     cvFileName: candidateData.cvFileName || null,
     cvStoragePath: candidateData.cvStoragePath || null,
-    notes: candidateData.notes || null,
-    source: candidateData.source || null,
-    parsedData: candidateData.parsedData || null,
+    notes: sanitized.notes || null,
+    source: sanitized.source || null,
+    parsedData: candidateData.parsedData || null, // From CV parser
     entityId: candidateData.entityId || null,
     branchId: candidateData.branchId || null,
     createdBy: userId,
@@ -204,26 +215,80 @@ export async function getCandidates(filters = {}) {
 }
 
 /**
- * Subscribe to candidates collection (real-time updates)
+ * Page size for paginated queries
+ */
+export const PAGE_SIZE = 20;
+
+/**
+ * Subscribe to candidates collection (real-time updates) - for initial page
+ * Returns unsubscribe function
  */
 export function subscribeToCandidates(callback, filters = {}) {
   const candidatesRef = collection(db, CANDIDATES_COLLECTION);
-  let q = query(candidatesRef, orderBy('createdAt', 'desc'));
+  let q = query(candidatesRef, orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
 
   if (filters.status && filters.status !== 'all') {
-    q = query(candidatesRef, where('status', '==', filters.status), orderBy('createdAt', 'desc'));
+    q = query(
+      candidatesRef, 
+      where('status', '==', filters.status), 
+      orderBy('createdAt', 'desc'),
+      limit(PAGE_SIZE)
+    );
   }
 
-  if (filters.jobId) {
-    q = query(candidatesRef, where('jobId', '==', filters.jobId), orderBy('createdAt', 'desc'));
+  if (filters.jobId && filters.jobId !== 'all') {
+    q = query(
+      candidatesRef, 
+      where('jobId', '==', filters.jobId), 
+      orderBy('createdAt', 'desc'),
+      limit(PAGE_SIZE)
+    );
   }
 
   return onSnapshot(q, (snapshot) => {
     const candidates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    callback(candidates);
+    const lastDoc = snapshot.docs[snapshot.docs.length - 1] || null;
+    const hasMore = snapshot.docs.length === PAGE_SIZE;
+    callback({ candidates, lastDoc, hasMore });
   }, (error) => {
     console.error('Error subscribing to candidates:', error);
+    callback({ candidates: [], lastDoc: null, hasMore: false, error });
   });
+}
+
+/**
+ * Fetch next page of candidates (cursor-based pagination)
+ * @param {DocumentSnapshot} startAfterDoc - Last document from previous page
+ * @param {Object} filters - Filter options
+ * @returns {Promise<{candidates, lastDoc, hasMore}>}
+ */
+export async function fetchCandidatesPage(startAfterDoc, filters = {}) {
+  const candidatesRef = collection(db, CANDIDATES_COLLECTION);
+  
+  let constraints = [orderBy('createdAt', 'desc')];
+  
+  if (filters.status && filters.status !== 'all') {
+    constraints = [where('status', '==', filters.status), ...constraints];
+  }
+  
+  if (filters.jobId && filters.jobId !== 'all') {
+    constraints = [where('jobId', '==', filters.jobId), ...constraints];
+  }
+  
+  if (startAfterDoc) {
+    constraints.push(startAfter(startAfterDoc));
+  }
+  
+  constraints.push(limit(PAGE_SIZE));
+  
+  const q = query(candidatesRef, ...constraints);
+  const snapshot = await getDocs(q);
+  
+  const candidates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const lastDoc = snapshot.docs[snapshot.docs.length - 1] || null;
+  const hasMore = snapshot.docs.length === PAGE_SIZE;
+  
+  return { candidates, lastDoc, hasMore };
 }
 
 /**
@@ -259,31 +324,41 @@ export async function deleteCandidate(candidateId) {
 }
 
 /**
- * Get candidate counts by status
+ * Get candidate counts by status (using efficient server-side counting)
  */
 export async function getCandidateCounts() {
   const candidatesRef = collection(db, CANDIDATES_COLLECTION);
-  const snapshot = await getDocs(candidatesRef);
   
-  const counts = {
-    total: 0,
-    new: 0,
-    in_progress: 0,
-    approved: 0,
-    rejected: 0
+  // Run all count queries in parallel for speed
+  const [
+    totalSnap,
+    newSnap,
+    approvedSnap,
+    rejectedSnap,
+    withdrawnSnap
+  ] = await Promise.all([
+    getCountFromServer(query(candidatesRef)),
+    getCountFromServer(query(candidatesRef, where('status', '==', 'new'))),
+    getCountFromServer(query(candidatesRef, where('status', '==', 'approved'))),
+    getCountFromServer(query(candidatesRef, where('status', '==', 'rejected'))),
+    getCountFromServer(query(candidatesRef, where('status', '==', 'withdrawn')))
+  ]);
+
+  const total = totalSnap.data().count;
+  const newCount = newSnap.data().count;
+  const approved = approvedSnap.data().count;
+  const rejected = rejectedSnap.data().count + withdrawnSnap.data().count;
+  
+  // in_progress = total - new - approved - rejected - withdrawn
+  const inProgress = total - newCount - approved - rejected;
+
+  return {
+    total,
+    new: newCount,
+    in_progress: inProgress,
+    approved,
+    rejected
   };
-
-  snapshot.docs.forEach(doc => {
-    const data = doc.data();
-    counts.total++;
-    
-    if (data.status === 'new') counts.new++;
-    else if (data.status === 'approved') counts.approved++;
-    else if (data.status === 'rejected' || data.status === 'withdrawn') counts.rejected++;
-    else counts.in_progress++;
-  });
-
-  return counts;
 }
 
 // ============================================
@@ -296,8 +371,11 @@ export async function getCandidateCounts() {
 export async function addNote(candidateId, content, userId, userName) {
   const notesRef = collection(db, CANDIDATES_COLLECTION, candidateId, 'notes');
   
+  // Sanitise note content
+  const sanitizedContent = sanitizeNoteContent(content);
+  
   const note = {
-    content,
+    content: sanitizedContent,
     createdBy: userId,
     createdByName: userName || 'Unknown',
     createdAt: serverTimestamp()

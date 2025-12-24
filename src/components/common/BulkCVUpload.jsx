@@ -17,7 +17,7 @@ import { Button, Modal } from '../ui';
 import { useJobs } from '../../hooks/useJobs';
 import { useAuth } from '../../context/AuthContext';
 import { createCandidate, uploadCV, addActivity, updateCandidate } from '../../lib/candidates';
-import { parseCVContent, hasApiKey } from '../../lib/cvParser';
+import { parseCVContent } from '../../lib/cvParser';
 import { Link } from 'react-router-dom';
 import './BulkCVUpload.css';
 
@@ -311,28 +311,15 @@ export default function BulkCVUpload({
   const successCount = files.filter(f => f.status === 'success').length;
   const errorCount = files.filter(f => f.status === 'error').length;
   const pendingCount = files.filter(f => f.status === 'pending').length;
-  
-  // Check if AI parsing is available
-  const aiEnabled = hasApiKey();
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Bulk CV Upload" size="lg">
       <div className="bulk-upload">
-        {/* AI Status Banner */}
-        {aiEnabled ? (
-          <div className="ai-status-banner ai-enabled">
-            <Zap size={16} />
-            <span><strong>AI Parsing Active</strong> — Claude will intelligently extract candidate details</span>
-          </div>
-        ) : (
-          <div className="ai-status-banner ai-disabled">
-            <AlertCircle size={16} />
-            <span>
-              <strong>Basic Parsing Mode</strong> — 
-              <Link to="/settings" onClick={handleClose}> Configure Claude API</Link> for better accuracy
-            </span>
-          </div>
-        )}
+        {/* AI Status Banner - Always enabled (server-side) */}
+        <div className="ai-status-banner ai-enabled">
+          <Zap size={16} />
+          <span><strong>AI Parsing Active</strong> — Claude will intelligently extract candidate details</span>
+        </div>
 
         {/* Job Selection */}
         <div className="bulk-upload-job-select">

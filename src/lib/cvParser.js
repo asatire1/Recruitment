@@ -3,24 +3,68 @@
  * 
  * This module provides comprehensive CV parsing functionality:
  * 1. Text extraction using pdf.js (for PDFs) and mammoth.js (for DOCX)
- * 2. AI-powered parsing using Claude API for intelligent field extraction
+ * 2. AI-powered parsing via secure Cloud Function (API key server-side)
  * 
- * Falls back to regex-based parsing if Claude API is unavailable
+ * Falls back to regex-based parsing if Cloud Function unavailable
+ * 
+ * NOTE: Libraries are dynamically imported to reduce initial bundle size
  */
 
-import * as pdfjsLib from 'pdfjs-dist';
-import mammoth from 'mammoth';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from './firebase';
 
-// Set up pdf.js worker - use unpkg which mirrors npm versions directly
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+// Lazy-loaded library references
+let pdfjsLib = null;
+let mammoth = null;
+
+// Cloud Function reference (lazy initialized)
+let parseCVFunction = null;
+
+/**
+ * Get the parseCV Cloud Function
+ */
+function getParseFunction() {
+  if (!parseCVFunction) {
+    parseCVFunction = httpsCallable(functions, 'parseCV');
+  }
+  return parseCVFunction;
+}
+
+/**
+ * Dynamically load pdf.js library
+ */
+async function loadPdfJs() {
+  if (pdfjsLib) return pdfjsLib;
+  
+  console.log('CV Parser - Loading pdf.js library...');
+  pdfjsLib = await import('pdfjs-dist');
+  
+  // Set up pdf.js worker
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+  
+  return pdfjsLib;
+}
+
+/**
+ * Dynamically load mammoth.js library
+ */
+async function loadMammoth() {
+  if (mammoth) return mammoth;
+  
+  console.log('CV Parser - Loading mammoth.js library...');
+  const mammothModule = await import('mammoth');
+  mammoth = mammothModule.default || mammothModule;
+  
+  return mammoth;
+}
 
 /**
  * Main entry point - Parse CV content and extract candidate information
  * @param {File} file - The CV file to parse
- * @param {string} claudeApiKey - Optional Claude API key for AI parsing
+ * @param {Object} options - Options (useSecure: boolean to force secure parsing)
  * @returns {Promise<Object>} Parsed candidate data
  */
-export async function parseCVContent(file, claudeApiKey = null) {
+export async function parseCVContent(file, options = {}) {
   // Step 1: Extract text from the file
   let textContent = '';
   
@@ -36,7 +80,6 @@ export async function parseCVContent(file, claudeApiKey = null) {
     }
   } catch (error) {
     console.error('Error extracting text from file:', error);
-    // Fall back to filename-based parsing
     return generateCandidateFromFilename(file.name);
   }
   
@@ -46,29 +89,19 @@ export async function parseCVContent(file, claudeApiKey = null) {
     return generateCandidateFromFilename(file.name);
   }
   
-  // Log first 500 chars of extracted text for debugging
   console.log('CV Parser - Extracted text preview:', textContent.substring(0, 500));
   
-  // Step 2: Parse the extracted text
-  // Try Claude API first if key is available, otherwise use regex parsing
-  const apiKey = claudeApiKey || getStoredApiKey();
-  
-  if (apiKey) {
-    try {
-      console.log('CV Parser - Attempting Claude API parsing...');
-      const aiParsedData = await parseWithClaude(textContent, apiKey);
-      console.log('CV Parser - Claude API result:', aiParsedData);
-      return {
-        ...aiParsedData,
-        rawText: textContent.substring(0, 5000), // Store first 5000 chars for reference
-        parsingMethod: 'claude-ai',
-        confidence: 'high'
-      };
-    } catch (error) {
-      console.warn('Claude API parsing failed, falling back to regex:', error.message);
-    }
-  } else {
-    console.log('CV Parser - No API key, using regex parsing');
+  // Step 2: Parse the extracted text using secure Cloud Function
+  try {
+    console.log('CV Parser - Using secure Cloud Function...');
+    const result = await parseWithCloudFunction(textContent);
+    
+    return {
+      ...result,
+      rawText: textContent.substring(0, 5000),
+    };
+  } catch (error) {
+    console.warn('Secure parsing failed, falling back to regex:', error.message);
   }
   
   // Fall back to regex-based parsing
@@ -82,13 +115,32 @@ export async function parseCVContent(file, claudeApiKey = null) {
 }
 
 /**
- * Extract text from a PDF file using pdf.js
+ * Parse CV text using secure Cloud Function
+ * @param {string} text - Extracted CV text
+ * @returns {Promise<Object>} Parsed candidate data
+ */
+async function parseWithCloudFunction(text) {
+  const parseCV = getParseFunction();
+  
+  const result = await parseCV({ cvText: text });
+  
+  if (!result.data.success) {
+    throw new Error(result.data.error || 'Cloud Function parsing failed');
+  }
+  
+  return result.data.data;
+}
+
+/**
+ * Extract text from a PDF file using pdf.js (dynamically loaded)
  * @param {File} file - PDF file
  * @returns {Promise<string>} Extracted text
  */
 async function extractTextFromPDF(file) {
+  const pdfjs = await loadPdfJs();
+  
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
   
   let fullText = '';
   
@@ -105,107 +157,21 @@ async function extractTextFromPDF(file) {
 }
 
 /**
- * Extract text from a Word document using mammoth.js
+ * Extract text from a Word document using mammoth.js (dynamically loaded)
  * @param {File} file - Word file (.doc or .docx)
  * @returns {Promise<string>} Extracted text
  */
 async function extractTextFromWord(file) {
+  const mammothLib = await loadMammoth();
+  
   const arrayBuffer = await file.arrayBuffer();
-  const result = await mammoth.extractRawText({ arrayBuffer });
+  const result = await mammothLib.extractRawText({ arrayBuffer });
   return result.value.trim();
 }
 
 /**
  * Parse CV text using Claude API
  * @param {string} text - Extracted CV text
- * @param {string} apiKey - Claude API key
- * @returns {Promise<Object>} Parsed candidate data
- */
-async function parseWithClaude(text, apiKey) {
-  // Truncate text if too long (Claude has context limits)
-  const truncatedText = text.substring(0, 15000);
-  
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: `You are a CV/resume parser. Extract the following information from this CV and return it as valid JSON only (no markdown, no explanation, just the JSON object):
-
-{
-  "firstName": "string or null",
-  "lastName": "string or null", 
-  "email": "string or null",
-  "phone": "string or null (include country code if present)",
-  "address": "string or null (full address if available)",
-  "postcode": "string or null (UK postcode format)",
-  "currentJobTitle": "string or null",
-  "yearsExperience": "number or null (estimate from work history)",
-  "skills": ["array of key skills"],
-  "experienceSummary": "string - brief 1-2 sentence summary of their experience",
-  "pharmacyExperience": "boolean - true if they have pharmacy/dispensing/healthcare experience",
-  "qualifications": ["array of qualifications/certifications"],
-  "rightToWork": "string or null - if mentioned (e.g., 'UK citizen', 'Tier 2 visa')"
-}
-
-CV TEXT:
-${truncatedText}`
-        }
-      ]
-    })
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(`Claude API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
-  }
-
-  const data = await response.json();
-  const content = data.content[0]?.text;
-  
-  if (!content) {
-    throw new Error('No content in Claude response');
-  }
-
-  // Parse the JSON response
-  try {
-    // Clean up the response - remove any markdown code blocks if present
-    const cleanedContent = content
-      .replace(/```json\n?/g, '')
-      .replace(/```\n?/g, '')
-      .trim();
-    
-    const parsed = JSON.parse(cleanedContent);
-    
-    return {
-      firstName: parsed.firstName || null,
-      lastName: parsed.lastName || null,
-      email: parsed.email || null,
-      phone: formatPhoneNumber(parsed.phone),
-      address: parsed.address || null,
-      postcode: parsed.postcode?.toUpperCase() || null,
-      currentJobTitle: parsed.currentJobTitle || null,
-      yearsExperience: parsed.yearsExperience || null,
-      skills: parsed.skills || [],
-      summary: parsed.experienceSummary || null,
-      pharmacyExperience: parsed.pharmacyExperience || false,
-      qualifications: parsed.qualifications || [],
-      rightToWork: parsed.rightToWork || null
-    };
-  } catch (parseError) {
-    console.error('Failed to parse Claude response as JSON:', content);
-    throw new Error('Invalid JSON response from Claude');
-  }
-}
-
 /**
  * Parse CV text using regex patterns (fallback method)
  * @param {string} text - Extracted CV text
@@ -500,47 +466,38 @@ function capitalizeFirst(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
-/**
- * Get stored Claude API key from localStorage
- * @returns {string|null}
- */
-function getStoredApiKey() {
-  try {
-    return localStorage.getItem('claude_api_key') || null;
-  } catch {
-    return null;
-  }
-}
+// ============================================
+// DEPRECATED - API key functions no longer needed
+// CV parsing now uses secure Cloud Function
+// ============================================
 
 /**
- * Store Claude API key in localStorage
- * @param {string} apiKey 
+ * @deprecated API key is now stored securely in Firebase Secrets
+ * This function is kept for backwards compatibility but does nothing
  */
 export function storeApiKey(apiKey) {
-  try {
-    localStorage.setItem('claude_api_key', apiKey);
-  } catch (error) {
-    console.error('Failed to store API key:', error);
-  }
+  console.warn('storeApiKey is deprecated. API key is now stored securely in Firebase Secrets.');
 }
 
 /**
- * Remove stored Claude API key
+ * @deprecated API key is now stored securely in Firebase Secrets
  */
 export function clearApiKey() {
+  console.warn('clearApiKey is deprecated. API key is now stored securely in Firebase Secrets.');
+  // Clear any legacy stored key
   try {
     localStorage.removeItem('claude_api_key');
-  } catch (error) {
-    console.error('Failed to clear API key:', error);
+  } catch {
+    // Ignore errors
   }
 }
 
 /**
- * Check if Claude API key is configured
- * @returns {boolean}
+ * @deprecated CV parsing now uses Cloud Function automatically
+ * @returns {boolean} Always returns true (Cloud Function handles API key)
  */
 export function hasApiKey() {
-  return !!getStoredApiKey();
+  return true; // Cloud Function has the key
 }
 
 /**

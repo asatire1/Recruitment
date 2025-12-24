@@ -12,13 +12,14 @@ import {
   ChevronRight,
   Key,
   Sparkles,
-  Calendar
+  Calendar,
+  CheckCircle,
+  Cloud
 } from 'lucide-react';
 import { Card, CardBody, Button, Input } from '../../components/ui';
 import Header from '../../components/layout/Header';
 import WhatsAppTemplates from './WhatsAppTemplates';
 import BookingAvailability from './BookingAvailability';
-import { storeApiKey, clearApiKey, hasApiKey } from '../../lib/cvParser';
 import './Settings.css';
 import './BookingAvailability.css';
 
@@ -91,94 +92,54 @@ const settingSections = [
 export default function Settings() {
   const { toggleMobileMenu } = useOutletContext();
   const [activeSection, setActiveSection] = useState('whatsapp');
-  const [apiKey, setApiKey] = useState('');
-  const [apiKeyConfigured, setApiKeyConfigured] = useState(hasApiKey());
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [apiKeySaved, setApiKeySaved] = useState(false);
-
-  const handleSaveApiKey = () => {
-    if (apiKey.trim()) {
-      storeApiKey(apiKey.trim());
-      setApiKeyConfigured(true);
-      setApiKeySaved(true);
-      setApiKey('');
-      setTimeout(() => setApiKeySaved(false), 3000);
-    }
-  };
-
-  const handleClearApiKey = () => {
-    clearApiKey();
-    setApiKeyConfigured(false);
-    setApiKey('');
-  };
 
   const renderAIParsingSettings = () => (
     <div className="settings-section">
       <div className="settings-section-header">
         <h2>AI CV Parsing</h2>
-        <p>Configure Claude API to intelligently extract candidate information from CVs</p>
+        <p>Intelligent candidate information extraction powered by Claude AI</p>
       </div>
 
       <Card>
         <CardBody>
           <div className="api-key-section">
             <div className="api-key-status">
-              <div className={`api-key-indicator ${apiKeyConfigured ? 'configured' : ''}`}>
-                <Key size={20} />
-                <span>{apiKeyConfigured ? 'API Key Configured' : 'API Key Not Set'}</span>
+              <div className="api-key-indicator configured">
+                <CheckCircle size={20} />
+                <span>AI Parsing Enabled</span>
               </div>
-              {apiKeySaved && (
-                <span className="api-key-saved">✓ Saved successfully</span>
-              )}
             </div>
 
             <div className="api-key-info">
-              <h4>What does this do?</h4>
+              <div className="secure-badge">
+                <Cloud size={16} />
+                <span>Secure Server-Side Processing</span>
+              </div>
+              
+              <h4>How it works</h4>
               <p>
-                When you upload CVs, Claude AI will automatically extract candidate details including 
-                name, email, phone number, address, work experience, skills, and qualifications. 
-                Without an API key, the system will use basic text parsing which is less accurate.
+                When you upload CVs, Claude AI automatically extracts candidate details including 
+                name, email, phone number, address, work experience, skills, and qualifications.
+              </p>
+              
+              <h4>Security</h4>
+              <p>
+                AI parsing is handled securely on our servers. No API keys are stored in your browser,
+                and all CV data is processed through encrypted connections.
               </p>
             </div>
 
-            <div className="api-key-form">
-              <label>Claude API Key</label>
-              <div className="api-key-input-group">
-                <Input
-                  type={showApiKey ? 'text' : 'password'}
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder={apiKeyConfigured ? '••••••••••••••••••••' : 'sk-ant-api...'}
-                />
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowApiKey(!showApiKey)}
-                >
-                  {showApiKey ? 'Hide' : 'Show'}
-                </Button>
-              </div>
-              <span className="api-key-hint">
-                Get your API key from{' '}
-                <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">
-                  console.anthropic.com
-                </a>
-              </span>
-            </div>
-
-            <div className="api-key-actions">
-              <Button onClick={handleSaveApiKey} disabled={!apiKey.trim()}>
-                Save API Key
-              </Button>
-              {apiKeyConfigured && (
-                <Button variant="outline" onClick={handleClearApiKey}>
-                  Remove API Key
-                </Button>
-              )}
-            </div>
-
-            <div className="api-key-note">
-              <strong>Note:</strong> Your API key is stored locally in your browser and is never sent to our servers. 
-              It is only used to communicate directly with the Claude API.
+            <div className="ai-features">
+              <h4>Extracted Information</h4>
+              <ul>
+                <li>✓ Name and contact details</li>
+                <li>✓ Email and phone number</li>
+                <li>✓ Address and postcode</li>
+                <li>✓ Work experience summary</li>
+                <li>✓ Skills and qualifications</li>
+                <li>✓ Pharmacy/healthcare experience detection</li>
+                <li>✓ Right to work status (if mentioned)</li>
+              </ul>
             </div>
           </div>
         </CardBody>

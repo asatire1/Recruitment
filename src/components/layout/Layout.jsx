@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import { OfflineIndicator } from '../common';
 import './Layout.css';
 
 export default function Layout() {
@@ -34,6 +35,9 @@ export default function Layout() {
       <main className="layout-main">
         <Outlet context={{ toggleMobileMenu }} />
       </main>
+      
+      {/* Offline indicator - shows when disconnected */}
+      <OfflineIndicator />
     </div>
   );
 }

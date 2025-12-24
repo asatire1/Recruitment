@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, MessageSquare, Copy } from 'lucide-react';
-import { Button, Card, CardBody, Badge, Modal, Input, Select, Textarea } from '../../components/ui';
+import { Button, Card, CardBody, Badge, Modal, Input, Select, Textarea, EmptyState } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import {
   subscribeToTemplates,
@@ -197,23 +197,21 @@ export default function WhatsAppTemplates() {
         /* Empty State */
         <Card className="templates-empty">
           <CardBody>
-            <div className="empty-state">
-              <div className="empty-state-icon">
-                <MessageSquare size={28} />
-              </div>
-              <h3 className="empty-state-title">No templates yet</h3>
-              <p className="empty-state-description">
-                Create your first template or load the default templates to get started.
-              </p>
-              <div className="empty-state-actions">
-                <Button onClick={handleSeedDefaults}>
-                  Load Default Templates
-                </Button>
-                <Button variant="outline" onClick={openCreate}>
-                  Create Custom Template
-                </Button>
-              </div>
-            </div>
+            <EmptyState
+              variant="messages"
+              title="No templates yet"
+              description="Create your first template or load the default templates to get started."
+              action={
+                <>
+                  <Button onClick={handleSeedDefaults}>
+                    Load Default Templates
+                  </Button>
+                  <Button variant="outline" onClick={openCreate}>
+                    Create Custom Template
+                  </Button>
+                </>
+              }
+            />
           </CardBody>
         </Card>
       ) : (

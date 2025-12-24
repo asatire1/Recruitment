@@ -16,10 +16,11 @@ import {
   X,
   AlertCircle
 } from 'lucide-react';
-import { Button, Card, CardBody, Badge, Input } from '../../components/ui';
+import { Button, Card, CardBody, Badge, Input, EmptyState } from '../../components/ui';
 import { JobFormModal } from '../../components/common';
 import Header from '../../components/layout/Header';
 import { useJobs, useJobStats } from '../../hooks/useJobs';
+import { useToast } from '../../context';
 import { 
   JOB_CATEGORIES, 
   getCategoryLabel, 
@@ -31,6 +32,7 @@ import './Jobs.css';
 
 export default function Jobs() {
   const { toggleMobileMenu } = useOutletContext();
+  const toast = useToast();
   
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,14 +86,17 @@ export default function Jobs() {
     try {
       if (editingJob) {
         await editJob(editingJob.id, formData);
+        toast.success('Job listing updated');
       } else {
         await addJob(formData);
+        toast.success('Job listing created');
       }
       setIsFormOpen(false);
       setEditingJob(null);
       refetchStats();
     } catch (err) {
       console.error('Error saving job:', err);
+      toast.error(err.message || 'Failed to save job listing');
     } finally {
       setIsSubmitting(false);
     }
@@ -102,9 +107,11 @@ export default function Jobs() {
     const newStatus = job.status === 'active' ? 'paused' : 'active';
     try {
       await updateJob(job.id, { status: newStatus });
+      toast.success(`Job ${newStatus === 'active' ? 'activated' : 'paused'}`);
       refetchStats();
     } catch (err) {
       console.error('Error updating status:', err);
+      toast.error('Failed to update job status');
     }
     setActiveMenu(null);
   };
@@ -113,9 +120,11 @@ export default function Jobs() {
   const handleDelete = async (jobId) => {
     try {
       await deleteJob(jobId);
+      toast.success('Job listing deleted');
       refetchStats();
     } catch (err) {
       console.error('Error deleting job:', err);
+      toast.error('Failed to delete job listing');
     }
     setDeleteConfirm(null);
     setActiveMenu(null);
@@ -240,28 +249,22 @@ export default function Jobs() {
           /* Empty State */
           <Card className="jobs-empty-card">
             <CardBody>
-              <div className="empty-state">
-                <div className="empty-state-icon">
-                  <Briefcase size={28} />
-                </div>
-                <h3 className="empty-state-title">
-                  {searchQuery || categoryFilter !== 'all' || statusFilter !== 'all'
-                    ? 'No jobs match your filters'
-                    : 'No job listings yet'
-                  }
-                </h3>
-                <p className="empty-state-description">
-                  {searchQuery || categoryFilter !== 'all' || statusFilter !== 'all'
-                    ? 'Try adjusting your search or filter criteria.'
-                    : 'Create your first job listing to start receiving candidate applications.'
-                  }
-                </p>
-                {!searchQuery && categoryFilter === 'all' && statusFilter === 'all' && (
+              <EmptyState
+                variant={searchQuery || categoryFilter !== 'all' || statusFilter !== 'all' ? 'search' : 'jobs'}
+                title={searchQuery || categoryFilter !== 'all' || statusFilter !== 'all'
+                  ? 'No jobs match your filters'
+                  : 'No job listings yet'
+                }
+                description={searchQuery || categoryFilter !== 'all' || statusFilter !== 'all'
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Create your first job listing to start receiving candidate applications.'
+                }
+                action={!searchQuery && categoryFilter === 'all' && statusFilter === 'all' && (
                   <Button leftIcon={<Plus size={16} />} onClick={() => setIsFormOpen(true)}>
                     Create Job Listing
                   </Button>
                 )}
-              </div>
+              />
             </CardBody>
           </Card>
         ) : (

@@ -1,41 +1,85 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   subscribeToCandidates, 
+  fetchCandidatesPage,
   createCandidate, 
   updateCandidate, 
   deleteCandidate,
   uploadCV,
-  getCandidateCounts 
+  getCandidateCounts,
+  PAGE_SIZE
 } from '../lib/candidates';
+import { queryKeys, invalidateQueries } from '../lib/queryClient';
 import { useAuth } from '../context/AuthContext';
 
 /**
- * Custom hook for managing candidates state with real-time updates
+ * Custom hook for managing candidates with cursor-based pagination
  */
 export function useCandidates(filters = {}) {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
   const { user } = useAuth();
+  
+  // Track last document for cursor pagination
+  const lastDocRef = useRef(null);
+  // Track if we're on the first page (real-time) or paginated
+  const isFirstPageRef = useRef(true);
 
-  // Subscribe to candidates collection
+  // Subscribe to first page with real-time updates
   useEffect(() => {
     setLoading(true);
     setError(null);
+    setCandidates([]);
+    lastDocRef.current = null;
+    isFirstPageRef.current = true;
 
-    const unsubscribe = subscribeToCandidates((candidatesData) => {
-      setCandidates(candidatesData);
+    const unsubscribe = subscribeToCandidates(({ candidates: data, lastDoc, hasMore: more, error: err }) => {
+      if (err) {
+        setError(err.message || 'Failed to load candidates');
+        setLoading(false);
+        return;
+      }
+      setCandidates(data);
+      lastDocRef.current = lastDoc;
+      setHasMore(more);
       setLoading(false);
-    }, { status: filters.status });
+    }, { status: filters.status, jobId: filters.jobId });
 
     return () => unsubscribe();
-  }, [filters.status]);
+  }, [filters.status, filters.jobId]);
 
-  // Apply client-side filtering and sorting
+  // Load more (next page)
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || !lastDocRef.current) return;
+    
+    setLoadingMore(true);
+    isFirstPageRef.current = false;
+    
+    try {
+      const { candidates: nextPage, lastDoc, hasMore: more } = await fetchCandidatesPage(
+        lastDocRef.current,
+        { status: filters.status, jobId: filters.jobId }
+      );
+      
+      setCandidates(prev => [...prev, ...nextPage]);
+      lastDocRef.current = lastDoc;
+      setHasMore(more);
+    } catch (err) {
+      setError(err.message || 'Failed to load more candidates');
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, filters.status, filters.jobId]);
+
+  // Apply client-side filtering for search and date (on loaded data)
   const filteredCandidates = useMemo(() => {
     let result = [...candidates];
 
-    // Search filter
+    // Search filter (client-side on loaded data)
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       result = result.filter(candidate => 
@@ -47,12 +91,7 @@ export function useCandidates(filters = {}) {
       );
     }
 
-    // Job filter
-    if (filters.jobId && filters.jobId !== 'all') {
-      result = result.filter(c => c.jobId === filters.jobId);
-    }
-
-    // Date range filter
+    // Date range filter (client-side)
     if (filters.dateFrom) {
       const fromDate = new Date(filters.dateFrom);
       fromDate.setHours(0, 0, 0, 0);
@@ -71,8 +110,8 @@ export function useCandidates(filters = {}) {
       });
     }
 
-    // Sorting
-    if (filters.sortBy) {
+    // Sorting (client-side, default is already date_desc from server)
+    if (filters.sortBy && filters.sortBy !== 'date_desc') {
       result.sort((a, b) => {
         let aVal, bVal;
         
@@ -89,80 +128,50 @@ export function useCandidates(filters = {}) {
             aVal = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
             bVal = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
             return aVal - bVal;
-          case 'date_desc':
           default:
-            aVal = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-            bVal = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-            return bVal - aVal;
+            return 0;
         }
       });
     }
 
     return result;
-  }, [candidates, filters.search, filters.jobId, filters.dateFrom, filters.dateTo, filters.sortBy]);
+  }, [candidates, filters.search, filters.dateFrom, filters.dateTo, filters.sortBy]);
 
   // Create a new candidate with optional CV upload
   const addCandidate = useCallback(async (candidateData, cvFile = null) => {
     if (!user) throw new Error('Must be logged in to create a candidate');
     
-    try {
-      // If there's a CV file, we need to create candidate first to get ID
-      // Then upload CV and update the candidate
-      let cvData = {};
-      
-      // Create candidate first (without CV)
-      const newCandidate = await createCandidate(candidateData, user.uid);
-      
-      // If CV file provided, upload it
-      if (cvFile) {
-        cvData = await uploadCV(cvFile, newCandidate.id);
-        // Update candidate with CV info
-        await updateCandidate(newCandidate.id, cvData);
-      }
-      
-      return { ...newCandidate, ...cvData };
-    } catch (err) {
-      setError(err.message);
-      throw err;
+    let cvData = {};
+    const newCandidate = await createCandidate(candidateData, user.uid);
+    
+    if (cvFile) {
+      cvData = await uploadCV(cvFile, newCandidate.id);
+      await updateCandidate(newCandidate.id, cvData);
     }
+    
+    return { ...newCandidate, ...cvData };
   }, [user]);
 
   // Update an existing candidate
   const editCandidate = useCallback(async (candidateId, updates, newCvFile = null) => {
-    try {
-      let cvData = {};
-      
-      // If new CV file provided, upload it
-      if (newCvFile) {
-        cvData = await uploadCV(newCvFile, candidateId);
-      }
-      
-      const updated = await updateCandidate(candidateId, { ...updates, ...cvData });
-      return updated;
-    } catch (err) {
-      setError(err.message);
-      throw err;
+    let cvData = {};
+    
+    if (newCvFile) {
+      cvData = await uploadCV(newCvFile, candidateId);
     }
+    
+    const updated = await updateCandidate(candidateId, { ...updates, ...cvData });
+    return updated;
   }, []);
 
   // Delete a candidate
   const removeCandidate = useCallback(async (candidateId) => {
-    try {
-      await deleteCandidate(candidateId);
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
+    await deleteCandidate(candidateId);
   }, []);
 
   // Update candidate status
   const updateStatus = useCallback(async (candidateId, newStatus) => {
-    try {
-      await updateCandidate(candidateId, { status: newStatus });
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
+    await updateCandidate(candidateId, { status: newStatus });
   }, []);
 
   // Clear error
@@ -172,10 +181,14 @@ export function useCandidates(filters = {}) {
 
   return {
     candidates: filteredCandidates,
-    totalCount: candidates.length,
+    allLoadedCount: candidates.length,
     filteredCount: filteredCandidates.length,
     loading,
+    loadingMore,
     error,
+    hasMore,
+    pageSize: PAGE_SIZE,
+    loadMore,
     addCandidate,
     editCandidate,
     removeCandidate,
@@ -185,44 +198,25 @@ export function useCandidates(filters = {}) {
 }
 
 /**
- * Hook for getting candidate statistics
+ * Hook for getting candidate statistics (React Query version)
  */
 export function useCandidateStats() {
-  const [stats, setStats] = useState({
-    total: 0,
-    new: 0,
-    in_progress: 0,
-    approved: 0,
-    rejected: 0
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: queryKeys.candidates.stats(),
+    queryFn: getCandidateCounts,
+    staleTime: 60 * 1000, // Fresh for 1 minute
   });
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const counts = await getCandidateCounts();
-        setStats(counts);
-      } catch (err) {
-        console.error('Error fetching candidate stats:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchStats();
-  }, []);
-
-  const refetch = useCallback(async () => {
-    setLoading(true);
-    try {
-      const counts = await getCandidateCounts();
-      setStats(counts);
-    } catch (err) {
-      console.error('Error fetching candidate stats:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return { stats, loading, refetch };
+  return { 
+    stats: data || {
+      total: 0,
+      new: 0,
+      in_progress: 0,
+      approved: 0,
+      rejected: 0
+    }, 
+    loading: isLoading, 
+    error,
+    refetch 
+  };
 }

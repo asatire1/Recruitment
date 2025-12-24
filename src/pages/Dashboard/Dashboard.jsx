@@ -10,7 +10,7 @@ import {
   UserPlus,
   ChevronRight
 } from 'lucide-react';
-import { Card, CardBody, Badge, Button } from '../../components/ui';
+import { Card, CardBody, Badge, Button, Skeleton, StatCardSkeleton, ListSkeleton } from '../../components/ui';
 import Header from '../../components/layout/Header';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -221,8 +221,19 @@ export default function Dashboard() {
             </div>
             <CardBody className="dashboard-card-body">
               {candidatesLoading ? (
-                <div className="dashboard-loading">
-                  <div className="dashboard-loading-spinner" />
+                <div className="dashboard-candidates-list">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="dashboard-candidate-item dashboard-candidate-skeleton">
+                      <Skeleton variant="avatar" />
+                      <div className="dashboard-candidate-info">
+                        <Skeleton variant="text" width="120px" height="14px" />
+                        <Skeleton variant="text" width="80px" height="12px" />
+                      </div>
+                      <div className="dashboard-candidate-meta">
+                        <Skeleton variant="text" width="60px" height="22px" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : recentCandidates.length === 0 ? (
                 <div className="dashboard-empty">
@@ -279,8 +290,19 @@ export default function Dashboard() {
             </div>
             <CardBody className="dashboard-card-body">
               {interviewsLoading ? (
-                <div className="dashboard-loading">
-                  <div className="dashboard-loading-spinner" />
+                <div className="dashboard-interviews-list">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="dashboard-interview-item dashboard-interview-skeleton">
+                      <div className="dashboard-interview-date">
+                        <Skeleton variant="text" width="60px" height="14px" />
+                        <Skeleton variant="text" width="40px" height="12px" />
+                      </div>
+                      <div className="dashboard-interview-info">
+                        <Skeleton variant="text" width="100px" height="14px" />
+                        <Skeleton variant="text" width="120px" height="12px" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : upcomingInterviews.length === 0 ? (
                 <div className="dashboard-empty">

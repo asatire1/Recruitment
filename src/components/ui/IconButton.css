@@ -1,0 +1,97 @@
+/* Icon Button Base */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: all 0.15s ease;
+}
+
+.icon-button:hover:not(:disabled) {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.icon-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Sizes */
+.icon-button--small {
+  width: 28px;
+  height: 28px;
+}
+
+.icon-button--medium {
+  width: 32px;
+  height: 32px;
+}
+
+.icon-button--large {
+  width: 40px;
+  height: 40px;
+}
+
+/* Variants */
+.icon-button--default {
+  /* Default styles above */
+}
+
+.icon-button--primary {
+  color: var(--color-primary);
+}
+
+.icon-button--primary:hover:not(:disabled) {
+  background: var(--color-primary-light);
+}
+
+.icon-button--danger {
+  color: var(--color-error);
+}
+
+.icon-button--danger:hover:not(:disabled) {
+  background: rgba(255, 59, 48, 0.1);
+}
+
+.icon-button--ghost {
+  color: var(--color-text-tertiary);
+}
+
+.icon-button--ghost:hover:not(:disabled) {
+  color: var(--color-text-primary);
+  background: transparent;
+}
+
+/* Loader */
+.icon-button__loader {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: iconButtonSpin 0.8s linear infinite;
+}
+
+@keyframes iconButtonSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .icon-button__loader {
+    animation: none;
+  }
+}

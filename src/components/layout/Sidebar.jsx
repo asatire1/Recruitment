@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Users,
   Briefcase,
+  CalendarDays,
   Settings,
   ChevronLeft,
   LogOut,
@@ -26,6 +27,11 @@ const navItems = [
     label: 'Job Listings',
     path: '/jobs',
     icon: Briefcase
+  },
+  {
+    label: 'Calendar',
+    path: '/calendar',
+    icon: CalendarDays
   },
   {
     label: 'Settings',

@@ -21,11 +21,13 @@ import {
   ArrowUpDown,
   Files
 } from 'lucide-react';
-import { Button, Card, CardBody, Badge, Input } from '../../components/ui';
-import { CandidateFormModal, BulkCVUpload } from '../../components/common';
+import { Button, Card, CardBody, Badge, Input, Skeleton, TableRowSkeleton, EmptyState } from '../../components/ui';
+import { CandidateFormModal, BulkCVUpload, CandidateCard } from '../../components/common';
 import Header from '../../components/layout/Header';
 import { useCandidates, useCandidateStats } from '../../hooks/useCandidates';
+import { useIsMobile } from '../../hooks/useMediaQuery';
 import { useJobs } from '../../hooks/useJobs';
+import { useToast } from '../../context';
 import { 
   CANDIDATE_STATUSES, 
   getStatusConfig, 
@@ -49,6 +51,8 @@ export default function Candidates() {
   const { toggleMobileMenu } = useOutletContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const toast = useToast();
+  const isMobile = useIsMobile();
   
   // Filters from URL params (for shareable links)
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
@@ -79,7 +83,19 @@ export default function Candidates() {
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
   // Hooks
-  const { candidates, totalCount, filteredCount, loading, error, addCandidate, editCandidate } = useCandidates({
+  const { 
+    candidates, 
+    allLoadedCount, 
+    filteredCount, 
+    loading, 
+    loadingMore,
+    error, 
+    hasMore, 
+    pageSize,
+    loadMore,
+    addCandidate, 
+    editCandidate 
+  } = useCandidates({
     status: statusFilter,
     search: searchQuery,
     jobId: jobFilter,
@@ -90,11 +106,14 @@ export default function Candidates() {
   const { stats, refetch: refetchStats } = useCandidateStats();
   const { jobs } = useJobs({ status: 'active' });
 
-  // Calculate pagination
+  // Client-side pagination on filtered results
   const totalPages = Math.ceil(filteredCount / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedCandidates = candidates.slice(startIndex, endIndex);
+  
+  // Check if we need to load more from server
+  const needsMoreData = endIndex >= allLoadedCount && hasMore;
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -151,14 +170,17 @@ export default function Candidates() {
     try {
       if (editingCandidate) {
         await editCandidate(editingCandidate.id, formData, cvFile);
+        toast.success('Candidate updated successfully');
       } else {
         await addCandidate(formData, cvFile);
+        toast.success('Candidate added successfully');
       }
       setIsFormOpen(false);
       setEditingCandidate(null);
       refetchStats();
     } catch (err) {
       console.error('Error saving candidate:', err);
+      toast.error(err.message || 'Failed to save candidate');
     } finally {
       setIsSubmitting(false);
     }
@@ -168,9 +190,12 @@ export default function Candidates() {
   const handleStatusChange = async (candidateId, newStatus) => {
     try {
       await updateCandidate(candidateId, { status: newStatus });
+      const statusLabel = getStatusConfig(newStatus).label;
+      toast.success(`Status updated to ${statusLabel}`);
       refetchStats();
     } catch (err) {
       console.error('Error updating status:', err);
+      toast.error('Failed to update status');
     }
     setActiveMenu(null);
   };
@@ -179,9 +204,11 @@ export default function Candidates() {
   const handleDelete = async (candidateId) => {
     try {
       await deleteCandidate(candidateId);
+      toast.success('Candidate deleted');
       refetchStats();
     } catch (err) {
       console.error('Error deleting candidate:', err);
+      toast.error('Failed to delete candidate');
     }
     setDeleteConfirm(null);
     setActiveMenu(null);
@@ -256,6 +283,16 @@ export default function Candidates() {
             <span className="candidates-stat-label">Approved</span>
           </div>
         </div>
+
+        {/* Results Limit Warning */}
+        {hasMore && (
+          <div className="candidates-limit-warning">
+            <AlertCircle size={16} />
+            <span>
+              Showing first {queryLimit} candidates. Use filters to narrow your search.
+            </span>
+          </div>
+        )}
 
         {/* Filters Bar */}
         <Card className="candidates-filters">
@@ -430,174 +467,182 @@ export default function Candidates() {
           /* Empty State */
           <Card className="candidates-empty-card">
             <CardBody>
-              <div className="empty-state">
-                <div className="empty-state-icon">
-                  <UserPlus size={28} />
-                </div>
-                <h3 className="empty-state-title">
-                  {hasActiveFilters
-                    ? 'No candidates match your filters'
-                    : 'No candidates yet'
-                  }
-                </h3>
-                <p className="empty-state-description">
-                  {hasActiveFilters
-                    ? 'Try adjusting your search or filter criteria.'
-                    : 'Get started by uploading a CV or manually adding a candidate.'
-                  }
-                </p>
-                {hasActiveFilters ? (
+              <EmptyState
+                variant={hasActiveFilters ? 'search' : 'candidates'}
+                title={hasActiveFilters ? 'No candidates match your filters' : 'No candidates yet'}
+                description={hasActiveFilters 
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Get started by uploading a CV or manually adding a candidate.'
+                }
+                action={hasActiveFilters ? (
                   <Button variant="outline" onClick={clearAllFilters}>
                     Clear Filters
                   </Button>
                 ) : (
-                  <div className="empty-state-actions">
-                    <Button leftIcon={<Upload size={16} />} onClick={() => setIsFormOpen(true)}>
-                      Add Candidate
-                    </Button>
-                  </div>
+                  <Button leftIcon={<Upload size={16} />} onClick={() => setIsFormOpen(true)}>
+                    Add Candidate
+                  </Button>
                 )}
-              </div>
+              />
             </CardBody>
           </Card>
         ) : (
-          /* Candidates Table */
+          /* Candidates List - Table on desktop, Cards on mobile */
           <>
-            <Card>
-              <div className="candidates-table-wrapper">
-                <table className="candidates-table">
-                  <thead>
-                    <tr>
-                      <th>Candidate</th>
-                      <th>Position</th>
-                      <th>Status</th>
-                      <th>Applied</th>
-                      <th>CV</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedCandidates.map((candidate) => {
-                      const statusConfig = getStatusConfig(candidate.status);
-                      return (
-                        <tr 
-                          key={candidate.id} 
-                          onClick={() => navigate(`/candidates/${candidate.id}`)}
-                          className="candidate-row-clickable"
-                        >
-                          <td>
-                            <div className="candidate-info">
-                              <div className="candidate-avatar">
-                                {getInitials(candidate)}
-                              </div>
-                              <div className="candidate-details">
-                                <div className="candidate-name">{getFullName(candidate)}</div>
-                                <div className="candidate-contact">
-                                  <span className="candidate-email">
-                                    <Mail size={12} />
-                                    {candidate.email}
-                                  </span>
-                                  <span className="candidate-phone">
-                                    <Phone size={12} />
-                                    {candidate.phone}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <span className="candidate-job">
-                              {candidate.jobTitle || 'Not assigned'}
-                            </span>
-                          </td>
-                          <td>
-                            <Badge variant={statusConfig.color} dot>
-                              {statusConfig.label}
-                            </Badge>
-                          </td>
-                          <td className="candidate-date">
-                            {formatDate(candidate.createdAt)}
-                          </td>
-                          <td>
-                            {candidate.cvUrl ? (
-                              <a 
-                                href={candidate.cvUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="candidate-cv-link"
-                                title="View CV"
-                              >
-                                <FileText size={16} />
-                                <ExternalLink size={12} />
-                              </a>
-                            ) : (
-                              <span className="candidate-no-cv">No CV</span>
-                            )}
-                          </td>
-                          <td>
-                            <div className="candidate-actions-wrapper">
-                              <button 
-                                className="candidate-actions-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveMenu(activeMenu === candidate.id ? null : candidate.id);
-                                }}
-                              >
-                                <MoreHorizontal size={18} />
-                              </button>
-                              
-                              {activeMenu === candidate.id && (
-                                <div className="candidate-dropdown" onClick={(e) => e.stopPropagation()}>
-                                  <button onClick={() => handleEdit(candidate)}>
-                                    <Edit2 size={16} />
-                                    Edit
-                                  </button>
-                                  
-                                  <div className="candidate-dropdown-divider" />
-                                  <div className="candidate-dropdown-label">Change Status</div>
-                                  
-                                  {CANDIDATE_STATUSES.slice(0, 6).map(status => (
-                                    <button 
-                                      key={status.value}
-                                      onClick={() => handleStatusChange(candidate.id, status.value)}
-                                      className={candidate.status === status.value ? 'active' : ''}
-                                    >
-                                      {status.label}
-                                    </button>
-                                  ))}
-                                  
-                                  <div className="candidate-dropdown-divider" />
-                                  
-                                  <button 
-                                    className="candidate-dropdown-danger"
-                                    onClick={() => setDeleteConfirm(candidate)}
-                                  >
-                                    <Trash2 size={16} />
-                                    Delete
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+            {isMobile ? (
+              /* Mobile Card View */
+              <div className="candidates-card-grid">
+                {paginatedCandidates.map((candidate) => (
+                  <CandidateCard
+                    key={candidate.id}
+                    candidate={candidate}
+                    onEdit={handleEdit}
+                    onDelete={setDeleteConfirm}
+                    onStatusChange={handleStatusChange}
+                    statuses={CANDIDATE_STATUSES}
+                  />
+                ))}
               </div>
-            </Card>
+            ) : (
+              /* Desktop Table View */
+              <Card>
+                <div className="candidates-table-wrapper">
+                  <table className="candidates-table">
+                    <thead>
+                      <tr>
+                        <th>Candidate</th>
+                        <th>Position</th>
+                        <th>Status</th>
+                        <th>Applied</th>
+                        <th>CV</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedCandidates.map((candidate) => {
+                        const statusConfig = getStatusConfig(candidate.status);
+                        return (
+                          <tr 
+                            key={candidate.id} 
+                            onClick={() => navigate(`/candidates/${candidate.id}`)}
+                            className="candidate-row-clickable"
+                          >
+                            <td>
+                              <div className="candidate-info">
+                                <div className="candidate-avatar">
+                                  {getInitials(candidate)}
+                                </div>
+                                <div className="candidate-details">
+                                  <div className="candidate-name">{getFullName(candidate)}</div>
+                                  <div className="candidate-contact">
+                                    <span className="candidate-email">
+                                      <Mail size={12} />
+                                      {candidate.email}
+                                    </span>
+                                    <span className="candidate-phone">
+                                      <Phone size={12} />
+                                      {candidate.phone}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span className="candidate-job">
+                                {candidate.jobTitle || 'Not assigned'}
+                              </span>
+                            </td>
+                            <td>
+                              <Badge variant={statusConfig.color} dot>
+                                {statusConfig.label}
+                              </Badge>
+                            </td>
+                            <td className="candidate-date">
+                              {formatDate(candidate.createdAt)}
+                            </td>
+                            <td>
+                              {candidate.cvUrl ? (
+                                <a 
+                                  href={candidate.cvUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="candidate-cv-link"
+                                  title="View CV"
+                                >
+                                  <FileText size={16} />
+                                  <ExternalLink size={12} />
+                                </a>
+                              ) : (
+                                <span className="candidate-no-cv">No CV</span>
+                              )}
+                            </td>
+                            <td>
+                              <div className="candidate-actions-wrapper">
+                                <button 
+                                  className="candidate-actions-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveMenu(activeMenu === candidate.id ? null : candidate.id);
+                                  }}
+                                >
+                                  <MoreHorizontal size={18} />
+                                </button>
+                                
+                                {activeMenu === candidate.id && (
+                                  <div className="candidate-dropdown" onClick={(e) => e.stopPropagation()}>
+                                    <button onClick={() => handleEdit(candidate)}>
+                                      <Edit2 size={16} />
+                                      Edit
+                                    </button>
+                                    
+                                    <div className="candidate-dropdown-divider" />
+                                    <div className="candidate-dropdown-label">Change Status</div>
+                                    
+                                    {CANDIDATE_STATUSES.slice(0, 6).map(status => (
+                                      <button 
+                                        key={status.value}
+                                        onClick={() => handleStatusChange(candidate.id, status.value)}
+                                        className={candidate.status === status.value ? 'active' : ''}
+                                      >
+                                        {status.label}
+                                      </button>
+                                    ))}
+                                    
+                                    <div className="candidate-dropdown-divider" />
+                                    
+                                    <button 
+                                      className="candidate-dropdown-danger"
+                                      onClick={() => setDeleteConfirm(candidate)}
+                                    >
+                                      <Trash2 size={16} />
+                                      Delete
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {(totalPages > 1 || hasMore) && (
               <div className="candidates-pagination">
                 <div className="candidates-pagination-info">
                   Showing {startIndex + 1}-{Math.min(endIndex, filteredCount)} of {filteredCount}
+                  {hasMore && ' (more available)'}
                 </div>
                 <div className="candidates-pagination-controls">
                   <button
                     className="candidates-pagination-btn"
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
+                    aria-label="Previous page"
                   >
                     <ChevronLeft size={18} />
                   </button>
@@ -619,6 +664,8 @@ export default function Candidates() {
                         key={pageNum}
                         className={`candidates-pagination-btn ${currentPage === pageNum ? 'active' : ''}`}
                         onClick={() => setCurrentPage(pageNum)}
+                        aria-label={`Page ${pageNum}`}
+                        aria-current={currentPage === pageNum ? 'page' : undefined}
                       >
                         {pageNum}
                       </button>
@@ -629,9 +676,21 @@ export default function Candidates() {
                     className="candidates-pagination-btn"
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
+                    aria-label="Next page"
                   >
                     <ChevronRight size={18} />
                   </button>
+                  
+                  {/* Load More from server */}
+                  {hasMore && (
+                    <button
+                      className="candidates-pagination-btn candidates-load-more"
+                      onClick={loadMore}
+                      disabled={loadingMore}
+                    >
+                      {loadingMore ? 'Loading...' : 'Load More'}
+                    </button>
+                  )}
                 </div>
               </div>
             )}

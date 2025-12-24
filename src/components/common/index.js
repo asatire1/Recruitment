@@ -1,7 +1,11 @@
 export { default as ProtectedRoute } from './ProtectedRoute';
 export { default as JobFormModal } from './JobFormModal';
 export { default as CandidateFormModal } from './CandidateFormModal';
+export { default as CandidateCard } from './CandidateCard';
 export { default as WhatsAppModal } from './WhatsAppModal';
 export { default as ScheduleInterviewModal } from './ScheduleInterviewModal';
 export { default as BulkCVUpload } from './BulkCVUpload';
 export { default as NotificationBell } from './NotificationBell';
+export { default as PageLoader, InlineLoader, ButtonLoader } from './PageLoader';
+export { default as OfflineIndicator } from './OfflineIndicator';
+export { default as AlgoliaSearch } from './AlgoliaSearch';

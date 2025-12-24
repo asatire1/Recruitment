@@ -1,11 +1,32 @@
 import { useState, useEffect } from 'react';
 import { Button, Input, Select, Textarea, Modal, FileUpload } from '../ui';
+import { useFormValidation, validators } from '../../hooks/useFormValidation';
 import { CANDIDATE_SOURCES } from '../../lib/candidates';
 import { getJobs } from '../../lib/jobs';
 import './CandidateFormModal.css';
 
 /**
+ * Validation schema for candidate form
+ */
+const validationSchema = {
+  firstName: [validators.required],
+  lastName: [validators.required],
+  email: [validators.required, validators.email],
+  phone: [validators.required, validators.phone],
+  postcode: [validators.postcode]
+};
+
+const fieldNames = {
+  firstName: 'First name',
+  lastName: 'Last name',
+  email: 'Email',
+  phone: 'Phone number',
+  postcode: 'Postcode'
+};
+
+/**
  * CandidateFormModal - Modal for creating and editing candidates
+ * Now with real-time validation
  */
 export default function CandidateFormModal({
   isOpen,
@@ -17,21 +38,42 @@ export default function CandidateFormModal({
 }) {
   const isEditing = !!candidate;
   
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    postcode: '',
-    jobId: '',
-    source: '',
-    notes: ''
+  // Get initial values
+  const getInitialValues = () => ({
+    firstName: candidate?.firstName || '',
+    lastName: candidate?.lastName || '',
+    email: candidate?.email || '',
+    phone: candidate?.phone || '',
+    address: candidate?.address || '',
+    postcode: candidate?.postcode || '',
+    jobId: candidate?.jobId || preSelectedJobId || '',
+    source: candidate?.source || '',
+    notes: candidate?.notes || ''
   });
+  
+  // Form validation hook
+  const {
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleBlur,
+    validate,
+    resetForm,
+    getFieldError
+  } = useFormValidation(
+    getInitialValues(),
+    validationSchema,
+    { 
+      debounceMs: 300,
+      validateOnChange: true,
+      validateOnBlur: true,
+      fieldNames
+    }
+  );
   
   const [cvFile, setCvFile] = useState(null);
   const [jobs, setJobs] = useState([]);
-  const [errors, setErrors] = useState({});
   const [loadingJobs, setLoadingJobs] = useState(true);
 
   // Fetch active jobs for dropdown
@@ -52,86 +94,29 @@ export default function CandidateFormModal({
     }
   }, [isOpen]);
 
-  // Populate form when editing or when preSelectedJobId changes
+  // Reset form when candidate changes or modal opens
   useEffect(() => {
-    if (candidate) {
-      setFormData({
-        firstName: candidate.firstName || '',
-        lastName: candidate.lastName || '',
-        email: candidate.email || '',
-        phone: candidate.phone || '',
-        address: candidate.address || '',
-        postcode: candidate.postcode || '',
-        jobId: candidate.jobId || '',
-        source: candidate.source || '',
-        notes: candidate.notes || ''
-      });
-      setCvFile(null);
-    } else {
-      // Reset form for new candidate
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        address: '',
-        postcode: '',
-        jobId: preSelectedJobId || '',
-        source: '',
-        notes: ''
-      });
+    if (isOpen) {
+      resetForm(getInitialValues());
       setCvFile(null);
     }
-    setErrors({});
-  }, [candidate, isOpen, preSelectedJobId]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: null }));
-    }
-  };
+  }, [isOpen, candidate?.id]);
 
   const handleFileSelect = (file) => {
     setCvFile(file);
   };
 
-  const validate = () => {
-    const newErrors = {};
-    
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-    
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    }
-    
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-    
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate all fields
     if (!validate()) return;
     
     // Get job title for denormalization
-    const selectedJob = jobs.find(j => j.id === formData.jobId);
+    const selectedJob = jobs.find(j => j.id === values.jobId);
     
     const submitData = {
-      ...formData,
+      ...values,
       jobTitle: selectedJob?.title || null
     };
     
@@ -139,20 +124,14 @@ export default function CandidateFormModal({
   };
 
   const handleClose = () => {
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      address: '',
-      postcode: '',
-      jobId: '',
-      source: '',
-      notes: ''
-    });
+    resetForm(getInitialValues());
     setCvFile(null);
-    setErrors({});
     onClose();
+  };
+
+  // Check if a field is valid (touched, has value, no error)
+  const isFieldValid = (name) => {
+    return touched[name] && values[name] && !errors[name];
   };
 
   // Format jobs for select dropdown
@@ -199,20 +178,24 @@ export default function CandidateFormModal({
             <Input
               label="First Name"
               name="firstName"
-              value={formData.firstName}
+              value={values.firstName}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="John"
-              error={errors.firstName}
+              error={getFieldError('firstName')}
+              success={isFieldValid('firstName')}
               required
             />
             
             <Input
               label="Last Name"
               name="lastName"
-              value={formData.lastName}
+              value={values.lastName}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Smith"
-              error={errors.lastName}
+              error={getFieldError('lastName')}
+              success={isFieldValid('lastName')}
               required
             />
           </div>
@@ -222,10 +205,12 @@ export default function CandidateFormModal({
               label="Email"
               name="email"
               type="email"
-              value={formData.email}
+              value={values.email}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="john.smith@email.com"
-              error={errors.email}
+              error={getFieldError('email')}
+              success={isFieldValid('email')}
               required
             />
             
@@ -233,29 +218,36 @@ export default function CandidateFormModal({
               label="Phone"
               name="phone"
               type="tel"
-              value={formData.phone}
+              value={values.phone}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="07123 456789"
-              error={errors.phone}
+              error={getFieldError('phone')}
+              success={isFieldValid('phone')}
               required
             />
           </div>
 
           <div className="candidate-form-row candidate-form-row-2col">
             <Input
-              label="Address (optional)"
+              label="Address"
               name="address"
-              value={formData.address}
+              value={values.address}
               onChange={handleChange}
               placeholder="123 Main Street, Manchester"
+              hint="Optional"
             />
             
             <Input
-              label="Postcode (optional)"
+              label="Postcode"
               name="postcode"
-              value={formData.postcode}
+              value={values.postcode}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="M1 1AA"
+              error={getFieldError('postcode')}
+              success={isFieldValid('postcode')}
+              hint={!touched.postcode ? "Optional" : undefined}
             />
           </div>
         </div>
@@ -268,7 +260,7 @@ export default function CandidateFormModal({
             <Select
               label="Job Position"
               name="jobId"
-              value={formData.jobId}
+              value={values.jobId}
               onChange={handleChange}
               options={jobOptions}
               placeholder={loadingJobs ? 'Loading jobs...' : 'Select a job position'}
@@ -278,7 +270,7 @@ export default function CandidateFormModal({
             <Select
               label="Source"
               name="source"
-              value={formData.source}
+              value={values.source}
               onChange={handleChange}
               options={CANDIDATE_SOURCES}
               placeholder="How did they apply?"
@@ -287,12 +279,13 @@ export default function CandidateFormModal({
 
           <div className="candidate-form-row">
             <Textarea
-              label="Notes (optional)"
+              label="Notes"
               name="notes"
-              value={formData.notes}
+              value={values.notes}
               onChange={handleChange}
               placeholder="Any additional notes about this candidate..."
               rows={3}
+              hint="Optional"
             />
           </div>
         </div>

@@ -3,7 +3,8 @@ import {
   doc, 
   addDoc, 
   getDoc, 
-  getDocs, 
+  getDocs,
+  getCountFromServer,
   updateDoc, 
   deleteDoc,
   query, 
@@ -13,6 +14,7 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { sanitizeJobData, containsSuspiciousContent } from './sanitize';
 
 /**
  * Firestore Job Schema
@@ -68,11 +70,19 @@ const JOBS_COLLECTION = 'jobs';
 export async function createJob(jobData, userId) {
   const jobsRef = collection(db, JOBS_COLLECTION);
   
+  // Sanitise user inputs
+  const sanitized = sanitizeJobData(jobData);
+  
+  // Log if suspicious content detected
+  if (containsSuspiciousContent(JSON.stringify(jobData))) {
+    console.warn('Suspicious content detected in job data, sanitising...');
+  }
+  
   const job = {
-    title: jobData.title,
-    category: jobData.category,
-    location: jobData.location,
-    description: jobData.description || '',
+    title: sanitized.title,
+    category: jobData.category, // From predefined list
+    location: sanitized.location,
+    description: sanitized.description || '',
     status: 'active',
     entityId: jobData.entityId || null,
     branchId: jobData.branchId || null,
@@ -178,28 +188,30 @@ export async function archiveJob(jobId) {
 }
 
 /**
- * Get job counts by status
+ * Get job counts by status (using efficient server-side counting)
  */
 export async function getJobCounts() {
   const jobsRef = collection(db, JOBS_COLLECTION);
-  const snapshot = await getDocs(jobsRef);
   
-  const counts = {
-    total: 0,
-    active: 0,
-    paused: 0,
-    closed: 0
+  // Run all count queries in parallel for speed
+  const [
+    totalSnap,
+    activeSnap,
+    pausedSnap,
+    closedSnap
+  ] = await Promise.all([
+    getCountFromServer(query(jobsRef)),
+    getCountFromServer(query(jobsRef, where('status', '==', 'active'))),
+    getCountFromServer(query(jobsRef, where('status', '==', 'paused'))),
+    getCountFromServer(query(jobsRef, where('status', '==', 'closed')))
+  ]);
+
+  return {
+    total: totalSnap.data().count,
+    active: activeSnap.data().count,
+    paused: pausedSnap.data().count,
+    closed: closedSnap.data().count
   };
-
-  snapshot.docs.forEach(doc => {
-    const data = doc.data();
-    counts.total++;
-    if (data.status === 'active') counts.active++;
-    else if (data.status === 'paused') counts.paused++;
-    else if (data.status === 'closed') counts.closed++;
-  });
-
-  return counts;
 }
 
 /**

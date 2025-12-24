@@ -1,16 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Button, Input, Select, Textarea, Modal } from '../ui';
+import { useFormValidation, validators } from '../../hooks/useFormValidation';
 import { JOB_CATEGORIES, CONTRACT_TYPES } from '../../lib/jobs';
 import './JobFormModal.css';
 
 /**
+ * Validation schema for job form
+ */
+const validationSchema = {
+  title: [validators.required, validators.minLength(3)],
+  category: [validators.required],
+  location: [validators.required],
+  hoursPerWeek: [validators.number]
+};
+
+const fieldNames = {
+  title: 'Job title',
+  category: 'Category',
+  location: 'Location',
+  hoursPerWeek: 'Hours per week'
+};
+
+/**
  * JobFormModal - Modal for creating and editing job listings
- * @param {Object} props
- * @param {boolean} props.isOpen
- * @param {function} props.onClose
- * @param {function} props.onSubmit
- * @param {Object} props.job - Existing job for editing (null for create)
- * @param {boolean} props.loading
+ * Now with real-time validation
  */
 export default function JobFormModal({
   isOpen,
@@ -21,76 +34,44 @@ export default function JobFormModal({
 }) {
   const isEditing = !!job;
   
-  const [formData, setFormData] = useState({
-    title: '',
-    category: '',
-    location: '',
-    description: '',
-    contractType: 'full_time',
-    salary: '',
-    hoursPerWeek: ''
+  // Get initial values
+  const getInitialValues = () => ({
+    title: job?.title || '',
+    category: job?.category || '',
+    location: job?.location || '',
+    description: job?.description || '',
+    contractType: job?.contractType || 'full_time',
+    salary: job?.salary || '',
+    hoursPerWeek: job?.hoursPerWeek?.toString() || ''
   });
-  
-  const [errors, setErrors] = useState({});
 
-  // Populate form when editing
+  // Form validation hook
+  const {
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleBlur,
+    validate,
+    resetForm,
+    getFieldError
+  } = useFormValidation(
+    getInitialValues(),
+    validationSchema,
+    { 
+      debounceMs: 300,
+      validateOnChange: true,
+      validateOnBlur: true,
+      fieldNames
+    }
+  );
+
+  // Reset form when job changes or modal opens
   useEffect(() => {
-    if (job) {
-      setFormData({
-        title: job.title || '',
-        category: job.category || '',
-        location: job.location || '',
-        description: job.description || '',
-        contractType: job.contractType || 'full_time',
-        salary: job.salary || '',
-        hoursPerWeek: job.hoursPerWeek?.toString() || ''
-      });
-    } else {
-      // Reset form for new job
-      setFormData({
-        title: '',
-        category: '',
-        location: '',
-        description: '',
-        contractType: 'full_time',
-        salary: '',
-        hoursPerWeek: ''
-      });
+    if (isOpen) {
+      resetForm(getInitialValues());
     }
-    setErrors({});
-  }, [job, isOpen]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: null }));
-    }
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    
-    if (!formData.title.trim()) {
-      newErrors.title = 'Job title is required';
-    }
-    
-    if (!formData.category) {
-      newErrors.category = 'Please select a category';
-    }
-    
-    if (!formData.location.trim()) {
-      newErrors.location = 'Location is required';
-    }
-    
-    if (formData.hoursPerWeek && isNaN(Number(formData.hoursPerWeek))) {
-      newErrors.hoursPerWeek = 'Must be a valid number';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  }, [isOpen, job?.id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -98,25 +79,21 @@ export default function JobFormModal({
     if (!validate()) return;
     
     const submitData = {
-      ...formData,
-      hoursPerWeek: formData.hoursPerWeek ? Number(formData.hoursPerWeek) : null
+      ...values,
+      hoursPerWeek: values.hoursPerWeek ? Number(values.hoursPerWeek) : null
     };
     
     await onSubmit(submitData);
   };
 
   const handleClose = () => {
-    setFormData({
-      title: '',
-      category: '',
-      location: '',
-      description: '',
-      contractType: 'full_time',
-      salary: '',
-      hoursPerWeek: ''
-    });
-    setErrors({});
+    resetForm(getInitialValues());
     onClose();
+  };
+
+  // Check if a field is valid (touched, has value, no error)
+  const isFieldValid = (name) => {
+    return touched[name] && values[name] && !errors[name];
   };
 
   return (
@@ -141,10 +118,12 @@ export default function JobFormModal({
           <Input
             label="Job Title"
             name="title"
-            value={formData.title}
+            value={values.title}
             onChange={handleChange}
+            onBlur={handleBlur}
             placeholder="e.g., Dispenser, Pharmacist"
-            error={errors.title}
+            error={getFieldError('title')}
+            success={isFieldValid('title')}
             required
           />
         </div>
@@ -153,18 +132,18 @@ export default function JobFormModal({
           <Select
             label="Category"
             name="category"
-            value={formData.category}
+            value={values.category}
             onChange={handleChange}
             options={JOB_CATEGORIES}
             placeholder="Select category"
-            error={errors.category}
+            error={getFieldError('category')}
             required
           />
           
           <Select
             label="Contract Type"
             name="contractType"
-            value={formData.contractType}
+            value={values.contractType}
             onChange={handleChange}
             options={CONTRACT_TYPES}
           />
@@ -174,42 +153,48 @@ export default function JobFormModal({
           <Input
             label="Location"
             name="location"
-            value={formData.location}
+            value={values.location}
             onChange={handleChange}
+            onBlur={handleBlur}
             placeholder="e.g., Manchester City Centre, Bolton"
-            error={errors.location}
+            error={getFieldError('location')}
+            success={isFieldValid('location')}
             required
           />
         </div>
 
         <div className="job-form-row job-form-row-2col">
           <Input
-            label="Salary (optional)"
+            label="Salary"
             name="salary"
-            value={formData.salary}
+            value={values.salary}
             onChange={handleChange}
             placeholder="e.g., £12-14/hour, £25,000-30,000"
+            hint="Optional"
           />
           
           <Input
-            label="Hours per Week (optional)"
+            label="Hours per Week"
             name="hoursPerWeek"
             type="number"
-            value={formData.hoursPerWeek}
+            value={values.hoursPerWeek}
             onChange={handleChange}
+            onBlur={handleBlur}
             placeholder="e.g., 40"
-            error={errors.hoursPerWeek}
+            error={getFieldError('hoursPerWeek')}
+            hint={!touched.hoursPerWeek ? "Optional" : undefined}
           />
         </div>
 
         <div className="job-form-row">
           <Textarea
-            label="Job Description (optional)"
+            label="Job Description"
             name="description"
-            value={formData.description}
+            value={values.description}
             onChange={handleChange}
             placeholder="Describe the role, responsibilities, and requirements..."
             rows={5}
+            hint="Optional"
           />
         </div>
       </form>

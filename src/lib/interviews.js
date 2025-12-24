@@ -405,3 +405,49 @@ export function isInterviewToday(timestamp) {
   const today = new Date();
   return date.toDateString() === today.toDateString();
 }
+
+/**
+ * Get interviews within a date range (for calendar view)
+ * @param {Date} startDate - Start of range
+ * @param {Date} endDate - End of range
+ * @returns {Promise<Array>} Interviews in range
+ */
+export async function getInterviewsInRange(startDate, endDate) {
+  const interviewsRef = collection(db, INTERVIEWS_COLLECTION);
+  
+  const q = query(
+    interviewsRef,
+    where('dateTime', '>=', Timestamp.fromDate(startDate)),
+    where('dateTime', '<=', Timestamp.fromDate(endDate)),
+    orderBy('dateTime', 'asc')
+  );
+  
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+/**
+ * Subscribe to interviews in a date range (for calendar real-time updates)
+ * @param {Date} startDate - Start of range
+ * @param {Date} endDate - End of range
+ * @param {Function} callback - Callback with interviews array
+ * @returns {Function} Unsubscribe function
+ */
+export function subscribeToInterviewsInRange(startDate, endDate, callback) {
+  const interviewsRef = collection(db, INTERVIEWS_COLLECTION);
+  
+  const q = query(
+    interviewsRef,
+    where('dateTime', '>=', Timestamp.fromDate(startDate)),
+    where('dateTime', '<=', Timestamp.fromDate(endDate)),
+    orderBy('dateTime', 'asc')
+  );
+  
+  return onSnapshot(q, (snapshot) => {
+    const interviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback(interviews);
+  }, (error) => {
+    console.error('Error subscribing to interviews in range:', error);
+    callback([]);
+  });
+}

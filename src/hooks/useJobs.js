@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { 
   subscribeToJobs, 
   createJob, 
@@ -6,6 +7,7 @@ import {
   deleteJob,
   getJobCounts 
 } from '../lib/jobs';
+import { queryKeys } from '../lib/queryClient';
 import { useAuth } from '../context/AuthContext';
 
 /**
@@ -97,44 +99,24 @@ export function useJobs(filters = {}) {
 }
 
 /**
- * Hook for getting job statistics
+ * Hook for getting job statistics (React Query version)
  */
 export function useJobStats() {
-  const [stats, setStats] = useState({
-    total: 0,
-    active: 0,
-    paused: 0,
-    closed: 0
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: queryKeys.jobs.stats(),
+    queryFn: getJobCounts,
+    staleTime: 60 * 1000, // Fresh for 1 minute
   });
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const counts = await getJobCounts();
-        setStats(counts);
-      } catch (err) {
-        console.error('Error fetching job stats:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchStats();
-  }, []);
-
-  // Refetch function
-  const refetch = useCallback(async () => {
-    setLoading(true);
-    try {
-      const counts = await getJobCounts();
-      setStats(counts);
-    } catch (err) {
-      console.error('Error fetching job stats:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return { stats, loading, refetch };
+  return { 
+    stats: data || {
+      total: 0,
+      active: 0,
+      paused: 0,
+      closed: 0
+    }, 
+    loading: isLoading, 
+    error,
+    refetch 
+  };
 }
