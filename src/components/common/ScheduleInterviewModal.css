@@ -1,0 +1,129 @@
+/* ScheduleInterviewModal Styles */
+
+.schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Candidate Info */
+.schedule-candidate-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-gray-50);
+  border-radius: var(--radius-lg);
+}
+
+.schedule-candidate-avatar {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  flex-shrink: 0;
+}
+
+.schedule-candidate-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.schedule-candidate-name {
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.schedule-candidate-job {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* Form Layout */
+.schedule-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.schedule-form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.schedule-section-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-secondary);
+}
+
+/* Field */
+.schedule-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.schedule-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.schedule-label svg {
+  color: var(--text-tertiary);
+}
+
+.schedule-input {
+  height: 40px;
+  padding: 0 var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.schedule-input:hover {
+  border-color: var(--color-gray-300);
+}
+
+.schedule-input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: var(--shadow-focus);
+}
+
+.schedule-input-error {
+  border-color: var(--color-error-500);
+}
+
+.schedule-error {
+  font-size: var(--text-sm);
+  color: var(--color-error-600);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .schedule-form-row-2col {
+    grid-template-columns: 1fr;
+  }
+}

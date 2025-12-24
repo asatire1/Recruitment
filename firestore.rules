@@ -1,0 +1,127 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isRecruiter() {
+      let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return isAuthenticated() && (userRole == 'admin' || userRole == 'recruiter');
+    }
+    
+    function isBranchManager() {
+      let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return isAuthenticated() && userRole == 'branch_manager';
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Only admins can create/update users (for now)
+      allow create, update: if isAdmin();
+      
+      // No one can delete users (soft delete via isActive flag)
+      allow delete: if false;
+    }
+    
+    // Job listings collection
+    match /jobs/{jobId} {
+      // All authenticated users can read jobs
+      allow read: if isAuthenticated();
+      
+      // Only recruiters and admins can create/update jobs
+      allow create, update: if isRecruiter();
+      
+      // Only admins can delete jobs
+      allow delete: if isAdmin();
+    }
+    
+    // Candidates collection
+    match /candidates/{candidateId} {
+      // Recruiters and admins can read all candidates
+      allow read: if isRecruiter();
+      
+      // Branch managers can only read candidates assigned to their branch for trials
+      // (More complex rules would be needed here based on trial assignments)
+      
+      // Only recruiters can create/update candidates
+      allow create, update: if isRecruiter();
+      
+      // Only admins can delete candidates
+      allow delete: if isAdmin();
+    }
+    
+    // Interviews collection
+    match /interviews/{interviewId} {
+      allow read: if isRecruiter();
+      allow create, update: if isRecruiter();
+      allow delete: if isAdmin();
+    }
+    
+    // Trials collection
+    match /trials/{trialId} {
+      // Recruiters can read all trials
+      allow read: if isRecruiter();
+      
+      // Branch managers can read trials at their branch
+      // (Would need to check branchId against user's branchIds)
+      
+      allow create, update: if isRecruiter();
+      allow delete: if isAdmin();
+    }
+    
+    // Trial feedback collection
+    match /trialFeedback/{feedbackId} {
+      // Recruiters and the branch manager who created it can read
+      allow read: if isRecruiter() || 
+        (isBranchManager() && resource.data.submittedBy == request.auth.uid);
+      
+      // Branch managers can create feedback
+      allow create: if isBranchManager() || isRecruiter();
+      
+      // Only the creator or admin can update
+      allow update: if isAdmin() || resource.data.submittedBy == request.auth.uid;
+      
+      allow delete: if isAdmin();
+    }
+    
+    // Entities collection (Allied, Sharief Healthcare, etc.)
+    match /entities/{entityId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Branches collection
+    match /branches/{branchId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Regions collection
+    match /regions/{regionId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Activity logs (read-only after creation)
+    match /activityLogs/{logId} {
+      allow read: if isRecruiter();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+  }
+}

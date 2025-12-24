@@ -1,0 +1,23 @@
+/* JobFormModal Styles */
+
+.job-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.job-form-row {
+  /* Single row wrapper */
+}
+
+.job-form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .job-form-row-2col {
+    grid-template-columns: 1fr;
+  }
+}

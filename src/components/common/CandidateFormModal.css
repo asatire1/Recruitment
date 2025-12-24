@@ -1,0 +1,40 @@
+/* CandidateFormModal Styles */
+
+.candidate-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.candidate-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.candidate-form-section-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.candidate-form-row {
+  /* Single row wrapper */
+}
+
+.candidate-form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .candidate-form-row-2col {
+    grid-template-columns: 1fr;
+  }
+}
