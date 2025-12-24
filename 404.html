@@ -4,8 +4,11 @@
   <meta charset="utf-8">
   <title>Allied Recruitment</title>
   <script>
-    var path = window.location.pathname;
-    window.location.replace('/Recruitment/' + '#' + path.replace('/Recruitment', ''));
+    // Single Page App redirect for GitHub Pages
+    var segment = window.location.pathname.split('/').slice(1);
+    var repo = 'Recruitment';
+    var path = segment.slice(1).join('/');
+    window.location.replace('/' + repo + '/#/' + path + window.location.search);
   </script>
 </head>
 <body>
