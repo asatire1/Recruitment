@@ -1,4 +1,5 @@
-import { Search, Bell, Menu } from 'lucide-react';
+import { Search, Menu } from 'lucide-react';
+import { NotificationBell } from '../common';
 import './Header.css';
 
 export default function Header({ title, subtitle, onMenuClick, actions }) {
@@ -25,10 +26,7 @@ export default function Header({ title, subtitle, onMenuClick, actions }) {
           <kbd className="header-search-kbd">⌘K</kbd>
         </div>
 
-        <button className="header-notification-btn" aria-label="Notifications">
-          <Bell size={20} />
-          <span className="header-notification-badge">3</span>
-        </button>
+        <NotificationBell />
 
         {actions && <div className="header-actions">{actions}</div>}
       </div>
