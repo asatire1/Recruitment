@@ -4,11 +4,15 @@
   <meta charset="utf-8">
   <title>Allied Recruitment</title>
   <script>
-    // Single Page App redirect for GitHub Pages
-    var segment = window.location.pathname.split('/').slice(1);
-    var repo = 'Recruitment';
-    var path = segment.slice(1).join('/');
-    window.location.replace('/' + repo + '/#/' + path + window.location.search);
+    // Redirect for GitHub Pages SPA
+    var path = window.location.pathname;
+    var repo = '/Recruitment';
+    // Remove repo prefix if present
+    if (path.startsWith(repo)) {
+      path = path.substring(repo.length);
+    }
+    // Redirect to index with hash routing
+    window.location.replace(repo + '/#' + path + window.location.search);
   </script>
 </head>
 <body>
