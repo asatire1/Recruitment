@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/Recruitment/static/css/main.280b161e.css",
-    "main.js": "/Recruitment/static/js/main.c5b08500.js",
+    "main.js": "/Recruitment/static/js/main.6b94820a.js",
     "index.html": "/Recruitment/index.html",
     "main.280b161e.css.map": "/Recruitment/static/css/main.280b161e.css.map",
-    "main.c5b08500.js.map": "/Recruitment/static/js/main.c5b08500.js.map"
+    "main.6b94820a.js.map": "/Recruitment/static/js/main.6b94820a.js.map"
   },
   "entrypoints": [
     "static/css/main.280b161e.css",
-    "static/js/main.c5b08500.js"
+    "static/js/main.6b94820a.js"
   ]
 }

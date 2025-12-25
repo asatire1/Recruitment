@@ -7,7 +7,7 @@ import './styles/global.css';
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
+    navigator.serviceWorker.register('/Recruitment/service-worker.js')
       .then(registration => {
         console.log('SW registered:', registration.scope);
       })

@@ -209,7 +209,7 @@ export function useServiceWorker() {
     // Register service worker
     const registerSW = async () => {
       try {
-        const reg = await navigator.serviceWorker.register('/service-worker.js');
+        const reg = await navigator.serviceWorker.register('/Recruitment/service-worker.js');
         setRegistration(reg);
 
         // Check for updates
