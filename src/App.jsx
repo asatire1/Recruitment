@@ -125,6 +125,15 @@ function AppRoutes() {
         </div>
       } />
 
+      {/* Unauthorized */}
+      <Route path="/unauthorized" element={
+        <div className="not-found-page">
+          <h1>Unauthorized</h1>
+          <p>You do not have permission to access this page.</p>
+          <a href="/Recruitment/login">Go to Login</a>
+        </div>
+      } />
+
       {/* 404 */}
       <Route path="*" element={
         <div className="not-found-page">
