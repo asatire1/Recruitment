@@ -121,7 +121,7 @@ function AppRoutes() {
         <div className="not-found-page">
           <h1>404</h1>
           <p>Page not found</p>
-          <a href="/dashboard">Go to Dashboard</a>
+          <a href="/Recruitment/dashboard">Go to Dashboard</a>
         </div>
       } />
     </Routes>
@@ -130,7 +130,7 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/Recruitment">
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>
