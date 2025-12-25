@@ -21,13 +21,13 @@ admin.initializeApp();
 
 // Initialize Anthropic client
 const anthropic = new Anthropic({
-  apiKey: functions.config().anthropic?.api_key || process.env.ANTHROPIC_API_KEY
+  apiKey: process.env.ANTHROPIC_API_KEY
 });
 
 // Initialize Algolia client
 const algoliaClient = algoliasearch(
-  functions.config().algolia?.app_id || process.env.ALGOLIA_APP_ID,
-  functions.config().algolia?.admin_key || process.env.ALGOLIA_ADMIN_KEY
+  process.env.ALGOLIA_APP_ID,
+  process.env.ALGOLIA_ADMIN_KEY
 );
 const candidatesIndex = algoliaClient.initIndex('allied_candidates');
 
@@ -282,7 +282,7 @@ exports.syncCandidateToAlgolia = functions.firestore
 exports.reindexAllCandidates = functions.https.onRequest(async (req, res) => {
   // Verify admin token or similar auth
   const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${functions.config().admin?.reindex_token}`) {
+  if (!authHeader || authHeader !== `Bearer ${process.env.ADMIN_REINDEX_TOKEN}`) {
     res.status(401).send('Unauthorized');
     return;
   }

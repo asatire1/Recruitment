@@ -1,0 +1,11 @@
+
+      {/* CV Upload Modal */}
+      {showUploader && (
+        <div className="modal-overlay" onClick={() => setShowUploader(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h2>Add New Candidate</h2>
+            <CVUploader onSuccess={() => setShowUploader(false)} />
+            <button className="close-btn" onClick={() => setShowUploader(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
