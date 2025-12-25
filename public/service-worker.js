@@ -4,25 +4,25 @@
  */
 
 const CACHE_NAME = 'allied-portal-v1';
-const OFFLINE_URL = '/offline.html';
+const OFFLINE_URL = '/Recruitment/offline.html';
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
-  '/',
-  '/manager',
+  '/Recruitment/',
+  '/Recruitment/manager',
   '/manager/reviews',
   '/manager/schedule',
-  '/offline.html',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  '/manifest.json'
+  '/Recruitment/offline.html',
+  '/Recruitment/icons/icon-192x192.png',
+  '/Recruitment/icons/icon-512x512.png',
+  '/Recruitment/manifest.json'
 ];
 
 // API routes to cache with network-first strategy
 const API_ROUTES = [
-  '/api/candidates',
-  '/api/events',
-  '/api/branches'
+  '/Recruitment/api/candidates',
+  '/Recruitment/api/events',
+  '/Recruitment/api/branches'
 ];
 
 // Install event - cache static assets
@@ -124,7 +124,7 @@ async function cacheFirst(request) {
     console.log('[SW] Fetch failed:', error);
     // Return offline fallback for images
     if (request.destination === 'image') {
-      return caches.match('/icons/placeholder.png');
+      return caches.match('/Recruitment/icons/placeholder.png');
     }
     throw error;
   }
@@ -179,8 +179,8 @@ self.addEventListener('push', (event) => {
   let data = {
     title: 'Allied Recruitment',
     body: 'You have a new notification',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
+    icon: '/Recruitment/icons/icon-192x192.png',
+    badge: '/Recruitment/icons/badge-72x72.png',
     tag: 'default',
     data: {}
   };
@@ -215,14 +215,14 @@ self.addEventListener('notificationclick', (event) => {
   
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url || '/manager';
+  const urlToOpen = event.notification.data?.url || '/Recruitment/manager';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
         // Check if there's already an open window
         for (const client of windowClients) {
-          if (client.url.includes('/manager') && 'focus' in client) {
+          if (client.url.includes('/Recruitment/manager') && 'focus' in client) {
             client.navigate(urlToOpen);
             return client.focus();
           }
@@ -256,7 +256,7 @@ async function syncCandidateReviews() {
     
     for (const review of pendingReviews) {
       try {
-        await fetch('/api/candidates/review', {
+        await fetch('/Recruitment/api/candidates/review', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(review)
@@ -279,7 +279,7 @@ async function syncScheduleUpdates() {
     
     for (const update of pendingUpdates) {
       try {
-        await fetch('/api/events/update', {
+        await fetch('/Recruitment/api/events/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(update)
