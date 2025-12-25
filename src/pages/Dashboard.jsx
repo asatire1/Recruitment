@@ -181,16 +181,46 @@ function ActivityItem({ activity }) {
     return date.toLocaleDateString();
   };
 
+  // Render activity description safely without dangerouslySetInnerHTML
+  const renderActivityText = () => {
+    const parts = activity.descriptionParts;
+    
+    // Handle legacy data that might still have HTML description
+    if (!parts && activity.description) {
+      // Strip HTML tags for legacy data (safe fallback)
+      const text = activity.description.replace(/<[^>]*>/g, '');
+      return <span>{text}</span>;
+    }
+    
+    if (!parts) {
+      return <span>Activity recorded</span>;
+    }
+
+    // Render structured parts safely
+    if (parts.prefix) {
+      return (
+        <>
+          {parts.prefix}<strong>{parts.name}</strong>{parts.text}
+        </>
+      );
+    }
+    
+    return (
+      <>
+        <strong>{parts.name}</strong> {parts.text}
+      </>
+    );
+  };
+
   return (
     <div className="activity-item">
       <div className={`activity-icon ${className}`}>
         <Icon />
       </div>
       <div className="activity-content">
-        <div 
-          className="activity-text"
-          dangerouslySetInnerHTML={{ __html: activity.description }}
-        />
+        <div className="activity-text">
+          {renderActivityText()}
+        </div>
         <div className="activity-time">{timeAgo(activity.createdAt)}</div>
       </div>
     </div>

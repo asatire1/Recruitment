@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Layouts
@@ -121,16 +121,7 @@ function AppRoutes() {
         <div className="not-found-page">
           <h1>Unauthorized</h1>
           <p>You do not have permission to access this page.</p>
-          <a href="/Recruitment/login">Go to Login</a>
-        </div>
-      } />
-
-      {/* Unauthorized */}
-      <Route path="/unauthorized" element={
-        <div className="not-found-page">
-          <h1>Unauthorized</h1>
-          <p>You do not have permission to access this page.</p>
-          <a href="/Recruitment/login">Go to Login</a>
+          <Link to="/login">Go to Login</Link>
         </div>
       } />
 
@@ -139,7 +130,7 @@ function AppRoutes() {
         <div className="not-found-page">
           <h1>404</h1>
           <p>Page not found</p>
-          <a href="/Recruitment/dashboard">Go to Dashboard</a>
+          <Link to="/dashboard">Go to Dashboard</Link>
         </div>
       } />
     </Routes>

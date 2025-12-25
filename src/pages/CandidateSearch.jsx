@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import {
   useAlgoliaSearch,
   useSkillSuggestions,
@@ -11,6 +12,12 @@ import {
 import { formatExperienceDuration } from '../hooks/useCVParser';
 import SearchFilters from '../components/SearchFilters';
 import './CandidateSearch.css';
+
+// Safely render Algolia highlighted HTML (only allows <em> tags for highlighting)
+const safeHighlight = (html) => {
+  if (!html) return '';
+  return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['em'] });
+};
 
 // Icons
 const Icons = {
@@ -134,9 +141,11 @@ function SearchResultCard({ result, onClick }) {
           <h3 
             className="result-name"
             dangerouslySetInnerHTML={{ 
-              __html: result._highlightResult?.firstName?.value 
-                ? `${result._highlightResult.firstName.value} ${result._highlightResult.lastName?.value || result.lastName}`
-                : fullName
+              __html: safeHighlight(
+                result._highlightResult?.firstName?.value 
+                  ? `${result._highlightResult.firstName.value} ${result._highlightResult.lastName?.value || result.lastName}`
+                  : fullName
+              )
             }}
           />
           <span 
@@ -152,7 +161,7 @@ function SearchResultCard({ result, onClick }) {
             <span className="meta-item">
               <Icons.Briefcase />
               <span dangerouslySetInnerHTML={{ 
-                __html: result._highlightResult?.appliedJobTitle?.value || result.appliedJobTitle 
+                __html: safeHighlight(result._highlightResult?.appliedJobTitle?.value || result.appliedJobTitle)
               }} />
             </span>
           )}
@@ -458,7 +467,7 @@ export default function CandidateSearch() {
                 setSearchInput('');
               }}
             >
-              <span dangerouslySetInnerHTML={{ __html: suggestion.highlighted }} />
+              <span dangerouslySetInnerHTML={{ __html: safeHighlight(suggestion.highlighted) }} />
               <span className="suggestion-count">({suggestion.count})</span>
             </button>
           ))}

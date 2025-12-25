@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { searchCandidates, getSearchSuggestions, isAlgoliaConfigured } from '../../lib/algolia';
 import './AlgoliaSearch.css';
 
@@ -169,11 +170,13 @@ export default function AlgoliaSearch({
     };
   }, []);
 
-  // Highlight matching text
+  // Highlight matching text (sanitized for security)
   const highlightMatch = (text, highlight) => {
     if (!highlight || !highlight.value) return text;
+    // Only allow <em> tags for highlighting, strip everything else
+    const sanitized = DOMPurify.sanitize(highlight.value, { ALLOWED_TAGS: ['em'] });
     return (
-      <span dangerouslySetInnerHTML={{ __html: highlight.value }} />
+      <span dangerouslySetInnerHTML={{ __html: sanitized }} />
     );
   };
 

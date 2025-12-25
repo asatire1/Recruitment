@@ -374,10 +374,14 @@ export default function WhatsAppModal({
           </div>
 
           {isPreview ? (
-            <div 
-              className="whatsapp-message-preview"
-              dangerouslySetInnerHTML={{ __html: (bookingLink ? message : getPreviewMessage()).replace(/\n/g, '<br>') }}
-            />
+            <div className="whatsapp-message-preview">
+              {(bookingLink ? message : getPreviewMessage()).split('\n').map((line, index, arr) => (
+                <span key={index}>
+                  {line}
+                  {index < arr.length - 1 && <br />}
+                </span>
+              ))}
+            </div>
           ) : (
             <Textarea
               value={message}

@@ -196,7 +196,7 @@ export function useRecentActivity(limitCount = 10) {
             type: lastEntry.action,
             candidateId: doc.id,
             candidateName: data.name,
-            description: getActivityDescription(lastEntry, data.name),
+            descriptionParts: getActivityDescriptionParts(lastEntry, data.name),
             createdAt: lastEntry.timestamp,
             metadata: {
               fromStatus: lastEntry.fromStatus,
@@ -219,23 +219,56 @@ export function useRecentActivity(limitCount = 10) {
   return { activities, loading, error };
 }
 
-// Helper function to generate activity descriptions
-function getActivityDescription(entry, candidateName) {
+// Helper function to generate activity description parts (safe - no HTML)
+function getActivityDescriptionParts(entry, candidateName) {
   switch (entry.action) {
     case 'created':
-      return `<strong>${candidateName}</strong> was added as a new candidate`;
+      return {
+        template: 'created',
+        name: candidateName,
+        text: 'was added as a new candidate'
+      };
     case 'status_change':
-      return `<strong>${candidateName}</strong> moved from ${formatStatus(entry.fromStatus)} to ${formatStatus(entry.toStatus)}`;
+      return {
+        template: 'status_change',
+        name: candidateName,
+        text: `moved from ${formatStatus(entry.fromStatus)} to ${formatStatus(entry.toStatus)}`
+      };
     case 'note_added':
-      return `Note added to <strong>${candidateName}</strong>'s profile`;
+      return {
+        template: 'note',
+        name: candidateName,
+        text: "'s profile",
+        prefix: 'Note added to '
+      };
     case 'interview_scheduled':
-      return `Interview scheduled for <strong>${candidateName}</strong>`;
+      return {
+        template: 'scheduled',
+        name: candidateName,
+        text: '',
+        prefix: 'Interview scheduled for '
+      };
     case 'trial_scheduled':
-      return `Trial scheduled for <strong>${candidateName}</strong>`;
+      return {
+        template: 'scheduled',
+        name: candidateName,
+        text: '',
+        prefix: 'Trial scheduled for '
+      };
     case 'feedback_submitted':
-      return `Feedback submitted for <strong>${candidateName}</strong>`;
+      return {
+        template: 'scheduled',
+        name: candidateName,
+        text: '',
+        prefix: 'Feedback submitted for '
+      };
     default:
-      return `Activity on <strong>${candidateName}</strong>'s profile`;
+      return {
+        template: 'default',
+        name: candidateName,
+        text: "'s profile",
+        prefix: 'Activity on '
+      };
   }
 }
 
