@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useManagerDashboard, useManagerSchedule } from '../hooks/useManagerPortal';
-import { useServiceWorker } from '../hooks/usePWA';
+import { useAuth } from '../../contexts/AuthContext';
+import { useManagerDashboard, useManagerSchedule } from '../../hooks/useManagerPortal';
+import { useServiceWorker } from '../../hooks/usePWA';
 import './ManagerDashboard.css';
 
 // Icons

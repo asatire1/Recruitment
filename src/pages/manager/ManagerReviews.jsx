@@ -4,10 +4,10 @@ import {
   usePendingReviews, 
   useReviewActions,
   REVIEW_DECISION 
-} from '../hooks/useManagerPortal';
-import { useServiceWorker, useOfflineStorage } from '../hooks/usePWA';
-import ReviewCard from '../components/ReviewCard';
-import ReviewModal from '../components/ReviewModal';
+} from '../../hooks/useManagerPortal';
+import { useServiceWorker, useOfflineStorage } from '../../hooks/usePWA';
+import ReviewCard from '../../components/ReviewCard';
+import ReviewModal from '../../components/ReviewModal';
 import './ManagerReviews.css';
 
 // Icons

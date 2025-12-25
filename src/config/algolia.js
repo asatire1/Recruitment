@@ -1,8 +1,9 @@
 import algoliasearch from 'algoliasearch/lite';
 
 // Algolia configuration from environment
-const ALGOLIA_APP_ID = process.env.REACT_APP_ALGOLIA_APP_ID;
-const ALGOLIA_SEARCH_KEY = process.env.REACT_APP_ALGOLIA_SEARCH_KEY;
+export const ALGOLIA_APP_ID = process.env.REACT_APP_ALGOLIA_APP_ID;
+export const ALGOLIA_SEARCH_KEY = process.env.REACT_APP_ALGOLIA_SEARCH_KEY;
+export const ALGOLIA_INDEX_NAME = 'allied_candidates';
 
 // Initialize Algolia client (search-only)
 export const searchClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY);

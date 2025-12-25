@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useManagerSchedule, useEventActions } from '../hooks/useManagerPortal';
-import { useServiceWorker } from '../hooks/usePWA';
-import EventCard from '../components/EventCard';
-import EventActionModal from '../components/EventActionModal';
+import { useManagerSchedule, useEventActions } from '../../hooks/useManagerPortal';
+import { useServiceWorker } from '../../hooks/usePWA';
+import EventCard from '../../components/EventCard';
+import EventActionModal from '../../components/EventActionModal';
 import './ManagerSchedule.css';
 
 // Icons
