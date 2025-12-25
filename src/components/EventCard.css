@@ -1,0 +1,128 @@
+/* ==========================================================================
+   Event Card Styles
+   ========================================================================== */
+
+.event-card {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border-left: 4px solid var(--type-color);
+}
+
+.event-card:active {
+  transform: scale(0.99);
+  background: var(--gray-50);
+}
+
+.event-card.confirmed {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, transparent 100%);
+}
+
+/* Time Block */
+.event-time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  padding-right: 0.75rem;
+  border-right: 1px solid var(--gray-100);
+}
+
+.event-start-time {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.event-duration {
+  font-size: 0.6875rem;
+  color: var(--gray-400);
+}
+
+/* Content */
+.event-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.event-type {
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--type-color) 15%, transparent);
+  color: var(--type-color);
+}
+
+.confirmed-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.confirmed-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.event-title {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  margin-bottom: 0.25rem;
+}
+
+.event-detail:last-child {
+  margin-bottom: 0;
+}
+
+.event-detail svg {
+  width: 12px;
+  height: 12px;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+/* Arrow */
+.event-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--gray-300);
+}
+
+.event-arrow svg {
+  width: 18px;
+  height: 18px;
+}

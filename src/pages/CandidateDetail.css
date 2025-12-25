@@ -1,0 +1,156 @@
+/* Candidate Detail Page */
+.candidate-detail {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: var(--gray-100);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-700);
+}
+
+.back-btn svg { width: 20px; height: 20px; }
+
+.header-info {
+  flex: 1;
+}
+
+.header-info h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 0.25rem;
+}
+
+.header-info p {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.status-select {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--status-color);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--status-color) 10%, white);
+  color: var(--status-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+/* Info Sections */
+.info-section {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 1rem;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  color: var(--gray-700);
+  text-decoration: none;
+}
+
+.info-item:hover {
+  background: var(--gray-100);
+}
+
+.info-item svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gray-400);
+}
+
+/* Actions */
+.actions-section {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.action-btn svg { width: 18px; height: 18px; }
+
+.action-btn.whatsapp {
+  background: #25d366;
+  color: white;
+}
+
+.action-btn.email {
+  background: var(--allied-teal);
+  color: white;
+}
+
+.action-btn.delete {
+  background: var(--gray-100);
+  color: var(--error);
+}
+
+.error-page {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.error-page h2 {
+  margin-bottom: 1rem;
+}
+
+.error-page a {
+  color: var(--allied-teal);
+}

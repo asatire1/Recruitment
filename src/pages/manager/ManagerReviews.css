@@ -1,0 +1,277 @@
+/* ==========================================================================
+   Manager Reviews Styles (Mobile-First PWA)
+   ========================================================================== */
+
+.manager-reviews {
+  min-height: 100vh;
+  background: var(--gray-50);
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+}
+
+/* Header */
+.reviews-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  padding-top: calc(1rem + env(safe-area-inset-top, 0));
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.back-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.header-content h1 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.review-count {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* Offline Notice */
+.offline-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--warning);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.offline-notice svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-100);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-bar > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-chip {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 9999px;
+  background: var(--white);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-base);
+}
+
+.filter-chip:active {
+  transform: scale(0.98);
+}
+
+.filter-chip.active {
+  background: var(--allied-teal);
+  border-color: var(--allied-teal);
+  color: white;
+}
+
+/* Success Toast */
+.success-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  margin: 1rem;
+  background: var(--success);
+  color: white;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+.success-toast svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading State */
+.reviews-loading {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeleton-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+}
+
+.skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-line {
+  height: 14px;
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Error State */
+.reviews-error {
+  padding: 2rem;
+  text-align: center;
+  color: var(--error);
+}
+
+.reviews-error button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--allied-teal);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Empty State */
+.reviews-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.reviews-empty svg {
+  width: 64px;
+  height: 64px;
+  color: var(--gray-300);
+  margin-bottom: 1rem;
+}
+
+.reviews-empty h2 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 0.5rem;
+}
+
+.reviews-empty p {
+  color: var(--gray-500);
+  margin: 0 0 1.5rem;
+}
+
+.back-link {
+  padding: 0.75rem 1.5rem;
+  background: var(--allied-teal);
+  color: white;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Reviews List */
+.reviews-list {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+  .manager-reviews {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}

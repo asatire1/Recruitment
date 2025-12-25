@@ -1,0 +1,305 @@
+/* ==========================================================================
+   Event Action Modal Styles
+   ========================================================================== */
+
+.event-action-modal {
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  background: var(--white);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Event Info */
+.event-info {
+  padding: 1rem;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.event-type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--type-color) 15%, transparent);
+  color: var(--type-color);
+  margin-bottom: 0.5rem;
+}
+
+.event-info .event-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 0.75rem;
+}
+
+.event-meta {
+  margin-bottom: 0.75rem;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+  margin-bottom: 0.25rem;
+}
+
+.meta-row svg {
+  width: 16px;
+  height: 16px;
+  color: var(--gray-400);
+}
+
+.meta-row.date {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  padding-left: 1.625rem;
+}
+
+.candidate-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.75rem;
+}
+
+.candidate-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+.candidate-row svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gray-400);
+}
+
+.call-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--allied-teal);
+  color: white;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.call-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.event-notes {
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+  padding: 0.75rem;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.75rem;
+}
+
+.event-notes strong {
+  color: var(--gray-700);
+}
+
+.status-indicator {
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+}
+
+.status-indicator strong {
+  text-transform: capitalize;
+}
+
+.status-indicator.scheduled strong { color: #3b82f6; }
+.status-indicator.confirmed strong { color: #22c55e; }
+.status-indicator.completed strong { color: #10b981; }
+.status-indicator.cancelled strong { color: #ef4444; }
+.status-indicator.no_show strong { color: #f97316; }
+
+/* Action Buttons */
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--action-color) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--action-color) 30%, transparent);
+  border-radius: var(--radius-xl);
+  color: var(--action-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-base);
+}
+
+.action-btn:active {
+  transform: scale(0.98);
+  background: color-mix(in srgb, var(--action-color) 20%, transparent);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Notes Section */
+.notes-section {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.selected-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: color-mix(in srgb, var(--action-color) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--action-color) 30%, transparent);
+  border-radius: var(--radius-lg);
+  color: var(--action-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.selected-action svg {
+  width: 18px;
+  height: 18px;
+}
+
+.change-btn {
+  margin-left: auto;
+  padding: 0.375rem 0.75rem;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.notes-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.notes-field label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+}
+
+.notes-field textarea {
+  flex: 1;
+  min-height: 80px;
+  padding: 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  resize: none;
+}
+
+.notes-field textarea:focus {
+  outline: none;
+  border-color: var(--allied-teal);
+  box-shadow: 0 0 0 3px rgba(22, 90, 92, 0.1);
+}
+
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem;
+  background: var(--btn-color);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-base);
+  margin-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submit-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Spinning animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1.5s linear infinite;
+}
+
+/* Desktop adjustments */
+@media (min-width: 640px) {
+  .event-action-modal {
+    border-radius: var(--radius-xl);
+    max-height: 80vh;
+  }
+}

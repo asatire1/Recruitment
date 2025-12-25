@@ -1,0 +1,393 @@
+/* ==========================================================================
+   CV Uploader Styles
+   ========================================================================== */
+
+.cv-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Hidden File Input */
+.file-input-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Drop Zone */
+.drop-zone {
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  background: var(--gray-50);
+}
+
+.drop-zone:hover,
+.drop-zone.active {
+  border-color: var(--allied-teal);
+  background: rgba(22, 90, 92, 0.05);
+}
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.drop-zone-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--allied-teal-light);
+  color: var(--allied-teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-zone-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.drop-zone h3 {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.drop-zone p {
+  font-size: 0.9375rem;
+  color: var(--gray-600);
+  margin: 0;
+}
+
+.drop-zone-hint {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+}
+
+/* Compact variant */
+.cv-uploader.compact .drop-zone {
+  padding: 1.5rem;
+}
+
+.cv-uploader.compact .drop-zone-icon {
+  width: 44px;
+  height: 44px;
+}
+
+.cv-uploader.compact .drop-zone-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.cv-uploader.compact .drop-zone h3 {
+  font-size: 1rem;
+}
+
+/* Selected File */
+.selected-file {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.file-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background: var(--gray-100);
+  color: var(--gray-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.file-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.file-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-size {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.remove-file-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: var(--gray-100);
+  color: var(--gray-500);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+}
+
+.remove-file-btn:hover {
+  background: var(--error-light);
+  color: var(--error);
+}
+
+.remove-file-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Progress */
+.progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--allied-teal);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  text-align: center;
+}
+
+/* Upload Button */
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Error */
+.upload-error,
+.parse-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--error-light);
+  border-radius: var(--radius-lg);
+  color: var(--error);
+  font-size: 0.875rem;
+}
+
+.upload-error svg,
+.parse-error svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.parse-error button {
+  margin-left: auto;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--error);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--error);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.parse-error button:hover {
+  background: var(--error);
+  color: white;
+}
+
+/* Uploaded CV */
+.uploaded-cv {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+}
+
+.cv-info {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.cv-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cv-icon.success {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.cv-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.cv-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.cv-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--success);
+  text-transform: uppercase;
+}
+
+.cv-filename {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.change-cv-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-base);
+}
+
+.change-cv-btn:hover {
+  border-color: var(--gray-400);
+  background: var(--gray-50);
+}
+
+/* Parse Button */
+.parse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.parse-btn:hover {
+  opacity: 0.9;
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+}
+
+.parse-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Parsing Status */
+.parsing-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  border-radius: var(--radius-lg);
+  color: #7c3aed;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.parsing-status svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Parse Complete */
+.parse-complete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--success-light);
+  border-radius: var(--radius-lg);
+  color: var(--success);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.parse-complete svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Spinning animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1.5s linear infinite;
+}

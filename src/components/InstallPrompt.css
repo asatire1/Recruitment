@@ -1,0 +1,87 @@
+/* Install Prompt Styles */
+
+.install-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--allied-teal) 0%, #1a6b6d 100%);
+  color: white;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  animation: slideUp 0.3s ease;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.install-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.install-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.install-icon svg { width: 22px; height: 22px; }
+
+.install-text h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0 0 0.125rem;
+}
+
+.install-text p {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.install-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.install-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.install-btn svg { width: 18px; height: 18px; }
+
+.install-btn.primary {
+  padding: 0.625rem 1rem;
+  background: white;
+  color: var(--allied-teal);
+}
+
+.install-btn.dismiss {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}

@@ -1,7 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
     // Helper functions
     function isAuthenticated() {
       return request.auth != null;
@@ -9,119 +8,91 @@ service cloud.firestore {
     
     function isAdmin() {
       return isAuthenticated() && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin';
     }
     
     function isRecruiter() {
-      let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-      return isAuthenticated() && (userRole == 'admin' || userRole == 'recruiter');
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['super_admin', 'recruiter'];
     }
     
-    function isBranchManager() {
-      let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-      return isAuthenticated() && userRole == 'branch_manager';
+    function isManager() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['super_admin', 'recruiter', 'regional_manager', 'branch_manager'];
     }
     
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function hasEntityAccess(entityId) {
+      let userData = getUserData();
+      return userData.role == 'super_admin' || userData.entityId == entityId;
+    }
+    
+    function hasBranchAccess(branchId) {
+      let userData = getUserData();
+      return userData.role in ['super_admin', 'recruiter'] || userData.branchId == branchId;
     }
 
     // Users collection
     match /users/{userId} {
-      // Users can read their own profile
-      allow read: if isOwner(userId) || isAdmin();
-      
-      // Only admins can create/update users (for now)
-      allow create, update: if isAdmin();
-      
-      // No one can delete users (soft delete via isActive flag)
-      allow delete: if false;
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
     }
-    
-    // Job listings collection
-    match /jobs/{jobId} {
-      // All authenticated users can read jobs
-      allow read: if isAuthenticated();
-      
-      // Only recruiters and admins can create/update jobs
-      allow create, update: if isRecruiter();
-      
-      // Only admins can delete jobs
-      allow delete: if isAdmin();
-    }
-    
+
     // Candidates collection
     match /candidates/{candidateId} {
-      // Recruiters and admins can read all candidates
-      allow read: if isRecruiter();
-      
-      // Branch managers can only read candidates assigned to their branch for trials
-      // (More complex rules would be needed here based on trial assignments)
-      
-      // Only recruiters can create/update candidates
-      allow create, update: if isRecruiter();
-      
-      // Only admins can delete candidates
+      allow read: if isAuthenticated();
+      allow create: if isRecruiter();
+      allow update: if isManager();
       allow delete: if isAdmin();
     }
-    
-    // Interviews collection
-    match /interviews/{interviewId} {
-      allow read: if isRecruiter();
+
+    // Jobs collection
+    match /jobs/{jobId} {
+      allow read: if isAuthenticated();
       allow create, update: if isRecruiter();
       allow delete: if isAdmin();
     }
-    
-    // Trials collection
-    match /trials/{trialId} {
-      // Recruiters can read all trials
-      allow read: if isRecruiter();
-      
-      // Branch managers can read trials at their branch
-      // (Would need to check branchId against user's branchIds)
-      
-      allow create, update: if isRecruiter();
-      allow delete: if isAdmin();
+
+    // Events/Calendar collection
+    match /events/{eventId} {
+      allow read: if isAuthenticated();
+      allow create: if isRecruiter();
+      allow update: if isManager();
+      allow delete: if isRecruiter();
     }
-    
-    // Trial feedback collection
-    match /trialFeedback/{feedbackId} {
-      // Recruiters and the branch manager who created it can read
-      allow read: if isRecruiter() || 
-        (isBranchManager() && resource.data.submittedBy == request.auth.uid);
-      
-      // Branch managers can create feedback
-      allow create: if isBranchManager() || isRecruiter();
-      
-      // Only the creator or admin can update
-      allow update: if isAdmin() || resource.data.submittedBy == request.auth.uid;
-      
-      allow delete: if isAdmin();
+
+    // Booking Links collection
+    match /bookingLinks/{linkId} {
+      allow read: if true; // Public for booking pages
+      allow write: if isRecruiter();
     }
-    
-    // Entities collection (Allied, Sharief Healthcare, etc.)
+
+    // Bookings collection
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated();
+      allow create: if true; // Public submission
+      allow update, delete: if isRecruiter();
+    }
+
+    // WhatsApp Templates collection
+    match /templates/{templateId} {
+      allow read: if isAuthenticated();
+      allow write: if isRecruiter();
+    }
+
+    // Entities collection
     match /entities/{entityId} {
       allow read: if isAuthenticated();
-      allow create, update, delete: if isAdmin();
+      allow write: if isAdmin();
     }
-    
+
     // Branches collection
     match /branches/{branchId} {
       allow read: if isAuthenticated();
-      allow create, update, delete: if isAdmin();
-    }
-    
-    // Regions collection
-    match /regions/{regionId} {
-      allow read: if isAuthenticated();
-      allow create, update, delete: if isAdmin();
-    }
-    
-    // Activity logs (read-only after creation)
-    match /activityLogs/{logId} {
-      allow read: if isRecruiter();
-      allow create: if isAuthenticated();
-      allow update, delete: if false;
+      allow write: if isAdmin();
     }
   }
 }

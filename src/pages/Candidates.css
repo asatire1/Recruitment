@@ -1,0 +1,243 @@
+/* Candidates Page */
+.candidates-page {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.header-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 0.25rem;
+}
+
+.header-content p {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.search-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: var(--allied-teal);
+  color: white;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.search-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Stats Bar */
+.stats-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  min-width: 80px;
+  font-family: inherit;
+  transition: all var(--transition-base);
+}
+
+.stat-chip:hover {
+  border-color: var(--chip-color);
+}
+
+.stat-chip.active {
+  background: color-mix(in srgb, var(--chip-color) 10%, white);
+  border-color: var(--chip-color);
+}
+
+.chip-count {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--chip-color);
+}
+
+.chip-label {
+  font-size: 0.6875rem;
+  color: var(--gray-500);
+  text-transform: uppercase;
+}
+
+/* Filters */
+.filters-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  background: var(--white);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+}
+
+.search-input svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gray-400);
+}
+
+.search-input input {
+  flex: 1;
+  padding: 0.75rem 0;
+  border: none;
+  font-size: 0.9375rem;
+  font-family: inherit;
+}
+
+.search-input input:focus {
+  outline: none;
+}
+
+.filters-bar select {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  background: var(--white);
+}
+
+/* States */
+.loading-state, .error-state, .empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.loading-state .spinner {
+  margin: 0 auto 1rem;
+}
+
+.error-state button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--allied-teal);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+/* Candidates List */
+.candidates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.candidate-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  transition: all var(--transition-base);
+}
+
+.candidate-card:hover {
+  border-color: var(--allied-teal);
+  box-shadow: var(--shadow-md);
+}
+
+.candidate-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.candidate-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.candidate-avatar span {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--allied-teal);
+  color: white;
+  font-weight: 600;
+}
+
+.candidate-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.candidate-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 0.25rem;
+}
+
+.candidate-info p {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin: 0 0 0.5rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  background: color-mix(in srgb, var(--status-color) 15%, white);
+  color: var(--status-color);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 9999px;
+}
+
+.candidate-card > svg {
+  width: 20px;
+  height: 20px;
+  color: var(--gray-300);
+}
+
+@media (max-width: 640px) {
+  .filters-bar {
+    flex-direction: column;
+  }
+}

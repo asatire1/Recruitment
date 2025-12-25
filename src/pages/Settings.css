@@ -1,0 +1,78 @@
+/* Settings Page */
+.settings-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 0.25rem;
+}
+
+.page-header p {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.settings-section {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--gray-50);
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item label {
+  font-size: 0.9375rem;
+  color: var(--gray-600);
+}
+
+.setting-item span {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+.role-badge {
+  padding: 0.25rem 0.75rem;
+  background: var(--allied-teal);
+  color: white !important;
+  border-radius: 9999px;
+  font-size: 0.75rem !important;
+  text-transform: capitalize;
+}
+
+.version-info {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin: 0.5rem 0 0;
+}

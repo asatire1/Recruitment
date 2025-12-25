@@ -1,0 +1,272 @@
+/* ==========================================================================
+   Manager Schedule Styles (Mobile-First PWA)
+   ========================================================================== */
+
+.manager-schedule {
+  min-height: 100vh;
+  background: var(--gray-50);
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+}
+
+/* Header */
+.schedule-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  padding-top: calc(1rem + env(safe-area-inset-top, 0));
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.back-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.header-content h1 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.date-label {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* Date Selector */
+.date-selector {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.date-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-base);
+}
+
+.date-btn:active {
+  transform: scale(0.98);
+}
+
+.date-btn.active {
+  background: var(--allied-teal);
+  border-color: var(--allied-teal);
+  color: white;
+}
+
+/* Success Toast */
+.success-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  margin: 1rem;
+  background: var(--success);
+  color: white;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+.success-toast svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading State */
+.schedule-loading {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeleton-event {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--white);
+  border-radius: var(--radius-xl);
+}
+
+.skeleton-time {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-line {
+  height: 14px;
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Error State */
+.schedule-error {
+  padding: 2rem;
+  text-align: center;
+  color: var(--error);
+}
+
+.schedule-error button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--allied-teal);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Empty State */
+.schedule-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.schedule-empty svg {
+  width: 64px;
+  height: 64px;
+  color: var(--gray-300);
+  margin-bottom: 1rem;
+}
+
+.schedule-empty h2 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 0.5rem;
+}
+
+.schedule-empty p {
+  color: var(--gray-500);
+  margin: 0;
+}
+
+/* Schedule Content */
+.schedule-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Event Group */
+.event-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.group-header svg {
+  width: 16px;
+  height: 16px;
+  color: var(--gray-400);
+}
+
+.group-count {
+  margin-left: auto;
+  padding: 0.125rem 0.5rem;
+  background: var(--gray-200);
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  color: var(--gray-600);
+}
+
+.group-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+  .manager-schedule {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
