@@ -1,35 +1,51 @@
 {
   "name": "allied-recruitment-portal",
-  "homepage": "https://asatire1.github.io/Recruitment",
   "version": "1.0.0",
-  "description": "Allied Pharmacies Recruitment Portal - Multi-entity HR management system",
   "private": true,
   "type": "module",
+  "description": "Allied Pharmacies Recruitment Management System",
   "scripts": {
-    "dev": "vite",
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "deploy": "npm run build && firebase deploy",
-    "deploy:hosting": "npm run build && firebase deploy --only hosting",
-    "deploy:functions": "firebase deploy --only functions",
-    "emulators": "firebase emulators:start"
+    "dev": "pnpm --filter recruitment-portal dev",
+    "dev:branch": "pnpm --filter branch-portal dev",
+    "dev:booking": "pnpm --filter booking-page dev",
+    "build": "pnpm run build:packages && pnpm run build:apps",
+    "build:packages": "pnpm --filter @allied/shared-lib build && pnpm --filter @allied/shared-ui build",
+    "build:apps": "pnpm --filter recruitment-portal build",
+    "build:recruitment": "pnpm run build:packages && pnpm --filter recruitment-portal build",
+    "build:branch": "pnpm run build:packages && pnpm --filter branch-portal build",
+    "build:booking": "pnpm run build:packages && pnpm --filter booking-page build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "firebase:emulators": "firebase emulators:start",
+    "firebase:deploy:dev": "firebase deploy --only hosting:recruitment -P development",
+    "firebase:deploy:staging": "firebase deploy --only hosting:recruitment -P staging",
+    "firebase:deploy:prod": "firebase deploy --only hosting:recruitment -P production"
   },
-  "dependencies": {
-    "algoliasearch": "^4.25.3",
-    "date-fns": "^3.3.1",
-    "dompurify": "^3.0.8",
-    "firebase": "^10.8.0",
-    "mammoth": "^1.6.0",
-    "pdfjs-dist": "^4.0.379",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.0"
+  "keywords": [
+    "recruitment",
+    "pharmacy",
+    "allied"
+  ],
+  "author": "Allied Pharmacies",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
   },
+  "packageManager": "pnpm@9.1.0",
   "devDependencies": {
-    "@types/react": "^18.2.55",
-    "@types/react-dom": "^18.2.19",
-    "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.1.0"
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "globals": "^15.12.0",
+    "prettier": "^3.4.1",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.15.0"
   }
 }

@@ -1,267 +1,306 @@
 # Allied Recruitment Portal
 
-Multi-entity recruitment management system for Allied Pharmacies built with React, Firebase, and Algolia.
+A comprehensive recruitment management system for Allied Pharmacies, built with React, TypeScript, and Firebase.
 
-## Features
+## 🏗️ Architecture
 
-- ✅ **Multi-entity Support** - Allied, Sharief Healthcare, Core Pharmaceuticals
-- ✅ **Role-based Access** - Super Admin, Recruiter, Regional Manager, Branch Manager, Viewer
-- ✅ **Candidate Pipeline** - Track candidates through 8 stages
-- ✅ **Job Management** - Create and manage job postings
-- ✅ **WhatsApp Integration** - Templates with 18 dynamic placeholders
-- ✅ **Calendar System** - Month/Week/Day views with event management
-- ✅ **Self-service Booking** - Public booking pages for candidates
-- ✅ **AI CV Parsing** - Claude-powered resume extraction
-- ✅ **Algolia Search** - Instant search with filters and facets
-- ✅ **Branch Manager PWA** - Mobile-first app with offline support
+This is a **monorepo** containing three applications and shared packages:
 
-## Quick Start
+```
+allied-recruitment-portal/
+├── apps/
+│   ├── recruitment-portal/   # Main admin app (~500KB)
+│   ├── branch-portal/        # Branch manager PWA (~50KB)
+│   └── booking-page/         # Public booking page (~30KB)
+├── packages/
+│   ├── shared-ui/            # Shared React components
+│   └── shared-lib/           # Shared utilities & types
+├── .github/workflows/        # CI/CD pipelines
+└── package.json              # Workspace root
+```
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
-- Firebase account
-- Algolia account (for search)
-- Anthropic API key (for CV parsing)
+- Node.js >= 18.0.0
+- pnpm >= 9.0.0
+- Firebase CLI (`npm install -g firebase-tools`)
 
-### 1. Clone & Install
+### Installation
 
 ```bash
-git clone <your-repo-url>
-cd allied-portal-app
-npm install
-cd functions && npm install && cd ..
+# Clone the repository
+git clone <repo-url>
+cd allied-recruitment-portal
+
+# Install dependencies
+pnpm install
+
+# Copy environment file
+cp apps/recruitment-portal/.env.example apps/recruitment-portal/.env.local
+# Edit .env.local with your Firebase config
 ```
 
-### 2. Firebase Setup
-
-1. Create a new Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
-
-2. Enable these services:
-   - Authentication (Email/Password)
-   - Firestore Database
-   - Storage
-   - Functions (Blaze plan required)
-   - Hosting
-
-3. Install Firebase CLI:
-```bash
-npm install -g firebase-tools
-firebase login
-firebase init
-```
-
-4. Get your Firebase config from Project Settings → General → Your Apps → Web App
-
-### 3. Environment Variables
-
-Copy `.env.example` to `.env` and fill in your credentials:
+### Development
 
 ```bash
-cp .env.example .env
+# Start recruitment portal
+pnpm dev
+
+# Start with Firebase emulators (recommended)
+pnpm firebase:emulators
+# Then in another terminal:
+pnpm dev
 ```
 
-Edit `.env`:
+## 📋 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start recruitment portal dev server |
+| `pnpm dev:branch` | Start branch portal dev server |
+| `pnpm dev:booking` | Start booking page dev server |
+| `pnpm build` | Build all packages and applications |
+| `pnpm build:recruitment` | Build recruitment portal only |
+| `pnpm lint` | Lint all code with ESLint |
+| `pnpm lint:fix` | Lint and auto-fix issues |
+| `pnpm format` | Format all code with Prettier |
+| `pnpm typecheck` | Run TypeScript type checking |
+| `pnpm clean` | Remove all node_modules and dist |
+| `pnpm firebase:emulators` | Start Firebase emulators |
+| `pnpm firebase:deploy:dev` | Deploy to development |
+| `pnpm firebase:deploy:staging` | Deploy to staging |
+| `pnpm firebase:deploy:prod` | Deploy to production |
+
+## 🔥 Firebase Setup
+
+### 1. Create Firebase Projects
+
+Create three Firebase projects in the [Firebase Console](https://console.firebase.google.com/):
+- `allied-recruitment-dev` (Development)
+- `allied-recruitment-staging` (Staging)  
+- `allied-recruitment-prod` (Production)
+
+### 2. Enable Services
+
+In each project, enable:
+- **Authentication** → Email/Password provider
+- **Firestore Database** → Start in production mode
+- **Storage** → Start in production mode
+- **Hosting**
+
+### 3. Create Hosting Sites
+
+For each project, create the hosting sites:
+
+```bash
+# Development
+firebase use development
+firebase hosting:sites:create allied-recruitment-dev
+firebase hosting:sites:create allied-branch-dev
+firebase hosting:sites:create allied-booking-dev
+
+# Staging
+firebase use staging
+firebase hosting:sites:create allied-recruitment-staging
+firebase hosting:sites:create allied-branch-staging
+firebase hosting:sites:create allied-booking-staging
+
+# Production
+firebase use production
+firebase hosting:sites:create recruitment-allied
+firebase hosting:sites:create branch-allied
+firebase hosting:sites:create book-allied
+```
+
+### 4. Get Firebase Config
+
+1. Go to Firebase Console → Project Settings → Your Apps
+2. Click "Add app" → Web
+3. Copy the config values to `.env.local`:
+
 ```env
-REACT_APP_FIREBASE_API_KEY=your_api_key
-REACT_APP_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-REACT_APP_FIREBASE_PROJECT_ID=your-project-id
-REACT_APP_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=123456789
-REACT_APP_FIREBASE_APP_ID=1:123:web:abc123
-
-REACT_APP_ALGOLIA_APP_ID=your_algolia_app_id
-REACT_APP_ALGOLIA_SEARCH_KEY=your_search_only_key
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
 ```
 
-### 4. Algolia Setup (Optional - for search)
-
-1. Create account at [algolia.com](https://www.algolia.com)
-2. Create an index named `allied_candidates`
-3. Create replica indexes for sorting:
-   - `allied_candidates_created_desc`
-   - `allied_candidates_experience_desc`
-   - `allied_candidates_experience_asc`
-   - `allied_candidates_name_asc`
-   - `allied_candidates_name_desc`
-
-### 5. Firebase Functions Config (for CV parsing)
+### 5. Deploy Firestore Rules
 
 ```bash
-firebase functions:config:set \
-  anthropic.api_key="your_claude_api_key" \
-  algolia.app_id="your_algolia_app_id" \
-  algolia.admin_key="your_algolia_admin_key"
+firebase deploy --only firestore:rules -P development
 ```
 
-### 6. Deploy Firestore Rules
+## 🚢 Deployment
+
+### Option A: Manual Deployment
 
 ```bash
-firebase deploy --only firestore:rules
+# Build first
+pnpm build:recruitment
+
+# Deploy to development
+pnpm firebase:deploy:dev
+
+# Deploy to staging
+pnpm firebase:deploy:staging
+
+# Deploy to production (use with caution!)
+pnpm firebase:deploy:prod
 ```
 
-### 7. Create Initial Admin User
+### Option B: GitHub Actions (Automatic)
 
-1. Run the app: `npm start`
-2. Go to Firebase Console → Authentication → Add User
-3. Create user with email/password
-4. Go to Firestore → Create collection `users`
-5. Add document with ID = user's UID:
+The project includes GitHub Actions workflows for automatic deployment:
+
+| Trigger | Environment |
+|---------|-------------|
+| Push to `develop` | Development |
+| Push to `main` | Staging |
+| Manual trigger | Choose any |
+
+### GitHub Secrets Required
+
+Add these secrets to your GitHub repository (Settings → Secrets → Actions):
+
+| Secret | Description | How to Get |
+|--------|-------------|------------|
+| `FIREBASE_SERVICE_ACCOUNT` | Firebase service account JSON | See below |
+| `VITE_FIREBASE_API_KEY` | Firebase API key | Firebase Console |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain | Firebase Console |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID | Firebase Console |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket | Firebase Console |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase sender ID | Firebase Console |
+| `VITE_FIREBASE_APP_ID` | Firebase app ID | Firebase Console |
+
+### Generate Service Account Key
+
+1. Go to Firebase Console → Project Settings → Service Accounts
+2. Click "Generate new private key"
+3. Download the JSON file
+4. Copy the **entire JSON content**
+5. Add as `FIREBASE_SERVICE_ACCOUNT` secret in GitHub
+
+## 👤 Creating Test Users
+
+After deploying, create a test user:
+
+### 1. Create Auth User
+
+In Firebase Console → Authentication → Users → Add User:
+- Email: `admin@alliedpharmacies.co.uk`
+- Password: (your choice)
+- Copy the **User UID**
+
+### 2. Create User Document
+
+In Firebase Console → Firestore → Create document:
+
+**Collection**: `users`  
+**Document ID**: (paste the User UID from step 1)
 
 ```json
 {
-  "email": "admin@allied.com",
+  "email": "admin@alliedpharmacies.co.uk",
   "displayName": "Admin User",
   "role": "super_admin",
-  "createdAt": "2024-01-01T00:00:00Z"
+  "entities": ["allied", "sharief", "core"],
+  "branches": [],
+  "isActive": true,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
 }
 ```
 
-### 8. Run Development Server
+### User Roles
 
-```bash
-npm start
-```
-
-App runs at [http://localhost:3000](http://localhost:3000)
-
-## Deployment
-
-### Deploy Everything
-
-```bash
-npm run deploy
-```
-
-### Deploy Individually
-
-```bash
-# Hosting only
-npm run deploy:hosting
-
-# Functions only
-npm run deploy:functions
-
-# Firestore rules
-firebase deploy --only firestore:rules
-```
-
-## Project Structure
-
-```
-allied-portal-app/
-├── public/
-│   ├── index.html
-│   ├── manifest.json
-│   ├── service-worker.js
-│   ├── offline.html
-│   └── icons/
-├── src/
-│   ├── components/      # Reusable components
-│   ├── contexts/        # React contexts (Auth)
-│   ├── hooks/           # Custom hooks
-│   ├── layouts/         # Page layouts
-│   ├── pages/           # Route pages
-│   │   └── manager/     # PWA manager pages
-│   ├── config/          # Firebase & Algolia config
-│   ├── styles/          # Global CSS
-│   ├── App.jsx
-│   └── index.js
-├── functions/           # Firebase Cloud Functions
-├── firebase.json
-├── firestore.rules
-└── package.json
-```
-
-## User Roles
-
-| Role | Access |
-|------|--------|
+| Role | Access Level |
+|------|-------------|
 | `super_admin` | Full access to everything |
-| `recruiter` | Candidates, Jobs, Templates, Calendar |
-| `regional_manager` | View all, manage assigned region |
-| `branch_manager` | PWA access, manage assigned branch |
+| `recruiter` | Manage candidates, jobs, interviews |
+| `branch_manager` | View assigned branch, submit feedback |
+| `regional_manager` | View regional branches |
 | `viewer` | Read-only access |
 
-## Routes
+## 🧩 Tech Stack
 
-### Main Portal
-- `/dashboard` - Overview stats
-- `/candidates` - Candidate list
-- `/candidates/:id` - Candidate detail
-- `/search` - Advanced search (Algolia)
-- `/jobs` - Job listings
-- `/jobs/:id` - Job detail
-- `/calendar` - Event calendar
-- `/templates` - WhatsApp templates
-- `/settings` - Admin settings
-
-### Manager PWA
-- `/manager` - Manager dashboard
-- `/manager/reviews` - Pending candidate reviews
-- `/manager/schedule` - Today's schedule
-
-### Public
-- `/login` - Authentication
-- `/book/:slug` - Public booking page
-
-## PWA Features
-
-The Branch Manager portal is a Progressive Web App:
-
-1. **Install on Device**
-   - iOS: Safari → Share → Add to Home Screen
-   - Android: Chrome → Menu → Install App
-
-2. **Offline Support**
-   - Cached pages work offline
-   - Actions queue for sync
-
-3. **Push Notifications** (requires setup)
-   - New candidate alerts
-   - Upcoming events
-
-## Tech Stack
-
-- **Frontend**: React 18, React Router 6
+- **Frontend**: React 18, TypeScript, Vite
+- **Routing**: React Router v6
 - **Backend**: Firebase (Auth, Firestore, Storage, Functions)
-- **Search**: Algolia
-- **AI**: Claude API (CV parsing)
-- **Styling**: CSS Custom Properties
+- **Search**: Algolia (planned)
+- **Styling**: CSS Variables (custom design system)
+- **Package Manager**: pnpm (workspaces)
+- **CI/CD**: GitHub Actions
 
-## Scripts
+## 📱 Applications
+
+### Recruitment Portal
+Full-featured admin application for the recruitment team.
+- Dashboard & analytics
+- Candidate management with CV parsing
+- Interview scheduling
+- WhatsApp integration
+- Job postings
+
+### Branch Manager Portal
+Lightweight PWA for 200+ pharmacy branch managers.
+- Branch calendar
+- Trial/interview schedule
+- Feedback submission
+- Push notifications
+
+### Booking Page
+Public page for candidate self-service scheduling.
+- Token-based access
+- Calendar selection
+- Slot booking
+
+## 🛠️ Development Tips
+
+### Adding Dependencies
 
 ```bash
-npm start          # Development server
-npm run build      # Production build
-npm test           # Run tests
-npm run deploy     # Deploy to Firebase
-npm run emulators  # Run Firebase emulators
+# Add to a specific app
+pnpm --filter recruitment-portal add <package>
+
+# Add to shared-lib
+pnpm --filter @allied/shared-lib add <package>
+
+# Add to root (dev dependency)
+pnpm add -D -w <package>
 ```
 
-## Troubleshooting
+### Using Shared Packages
 
-### "Permission denied" errors
-- Check Firestore rules are deployed
-- Verify user has correct role in `users` collection
+```tsx
+// Import components
+import { Button, Input, Modal } from '@allied/shared-ui'
 
-### Search not working
-- Verify Algolia credentials in `.env`
-- Check Algolia dashboard for index status
+// Import utilities and types
+import { formatPhone, type Candidate } from '@allied/shared-lib'
+```
 
-### CV parsing fails
-- Verify Claude API key in Functions config
-- Check Functions logs: `firebase functions:log`
+### Troubleshooting
 
-### PWA not installing
-- Must be served over HTTPS
-- Check manifest.json is valid
+**Build fails with module errors:**
+```bash
+pnpm clean
+pnpm install
+pnpm build
+```
 
-## Support
+**Firebase permission denied:**
+- Check that Firestore rules are deployed
+- Verify user document exists with correct role
 
-For issues, create a GitHub issue or contact the development team.
+**GitHub Actions fails:**
+- Verify all secrets are set correctly
+- Check service account has necessary permissions
 
-## License
+## 📄 License
 
-© 2024 Allied Pharmacies. All rights reserved.
+UNLICENSED - Private project for Allied Pharmacies

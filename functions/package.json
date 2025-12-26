@@ -1,12 +1,13 @@
 {
-  "name": "allied-portal-functions",
-  "description": "Firebase Cloud Functions for Allied Recruitment Portal",
+  "name": "allied-recruitment-functions",
   "version": "1.0.0",
-  "private": true,
+  "description": "Firebase Cloud Functions for Allied Recruitment Portal",
+  "main": "lib/index.js",
   "scripts": {
-    "lint": "eslint .",
-    "serve": "firebase emulators:start --only functions",
-    "shell": "firebase functions:shell",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
@@ -14,18 +15,17 @@
   "engines": {
     "node": "20"
   },
-  "main": "index.js",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.20.0",
-    "algoliasearch": "^4.22.1",
-    "firebase-admin": "^11.11.1",
-    "firebase-functions": "^4.9.0",
-    "mammoth": "^1.6.0",
-    "node-fetch": "^2.7.0",
+    "@anthropic-ai/sdk": "^0.32.1",
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.1.0",
+    "mammoth": "^1.8.0",
     "pdf-parse": "^1.1.1"
   },
   "devDependencies": {
-    "eslint": "^8.56.0",
-    "firebase-functions-test": "^3.1.1"
-  }
+    "@types/node": "^20.17.10",
+    "@types/pdf-parse": "^1.1.4",
+    "typescript": "^5.7.2"
+  },
+  "private": true
 }
