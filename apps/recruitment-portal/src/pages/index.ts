@@ -1,0 +1,14 @@
+// Pages index - export all page components
+
+export { Login } from './Login'
+export { ForgotPassword } from './ForgotPassword'
+export { Unauthorized } from './Unauthorized'
+export { NotFound } from './NotFound'
+export { Dashboard } from './Dashboard'
+export { Candidates } from './Candidates'
+export { CandidateDetail } from './CandidateDetail'
+export { Settings } from './Settings'
+export { Calendar } from './Calendar'
+export { Interviews } from './Interviews'
+export { Jobs } from './Jobs'
+export { JobDetail } from './JobDetail'

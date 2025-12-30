@@ -1,0 +1,287 @@
+/* ============================================================================
+   Allied Recruitment Portal - Keyboard Shortcuts CSS (R11.5)
+   Location: apps/recruitment-portal/src/components/KeyboardShortcuts.css
+   ============================================================================ */
+
+/* Shortcuts Modal */
+.shortcuts-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+  backdrop-filter: blur(4px);
+}
+
+.shortcuts-modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.shortcuts-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.shortcuts-modal-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-gray-900);
+}
+
+.shortcuts-modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-gray-500);
+  transition: all 0.15s ease;
+}
+
+.shortcuts-modal-close:hover {
+  background: var(--color-gray-100);
+  color: var(--color-gray-700);
+}
+
+.shortcuts-modal-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.shortcuts-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.shortcuts-group {
+  margin-bottom: 24px;
+}
+
+.shortcuts-group:last-child {
+  margin-bottom: 0;
+}
+
+.shortcuts-group h3 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-500);
+  margin: 0 0 12px;
+}
+
+.shortcuts-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.shortcuts-group li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.shortcuts-group li:last-child {
+  border-bottom: none;
+}
+
+.shortcut-description {
+  font-size: 14px;
+  color: var(--color-gray-700);
+}
+
+.shortcut-keys {
+  display: flex;
+  gap: 6px;
+}
+
+.shortcut-keys kbd,
+.shortcuts-modal-footer kbd,
+.command-palette-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  background: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.shortcuts-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-gray-200);
+  background: var(--color-gray-50);
+}
+
+.shortcuts-modal-footer p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-gray-500);
+  text-align: center;
+}
+
+.shortcuts-modal-footer kbd {
+  margin: 0 4px;
+}
+
+/* Command Palette */
+.command-palette-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1000;
+  padding: 100px 24px 24px;
+  backdrop-filter: blur(4px);
+}
+
+.command-palette {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 60vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.command-palette-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.command-palette-search-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-gray-400);
+  flex-shrink: 0;
+}
+
+.command-palette-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: var(--color-gray-900);
+  background: transparent;
+}
+
+.command-palette-input::placeholder {
+  color: var(--color-gray-400);
+}
+
+.command-palette-kbd {
+  flex-shrink: 0;
+}
+
+.command-palette-results {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px;
+}
+
+.command-palette-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--color-gray-500);
+  font-size: 14px;
+}
+
+.command-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease;
+}
+
+.command-palette-item:hover,
+.command-palette-item.selected {
+  background: var(--color-gray-100);
+}
+
+.command-palette-item-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-gray-500);
+  flex-shrink: 0;
+}
+
+.command-palette-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.command-palette-item-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-900);
+}
+
+.command-palette-item-description {
+  display: block;
+  font-size: 12px;
+  color: var(--color-gray-500);
+  margin-top: 2px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .shortcuts-modal-overlay,
+  .command-palette-overlay {
+    padding: 16px;
+  }
+  
+  .command-palette-overlay {
+    padding-top: 60px;
+  }
+  
+  .shortcuts-modal,
+  .command-palette {
+    max-height: 90vh;
+  }
+}

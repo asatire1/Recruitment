@@ -1,0 +1,15 @@
+/* Add to your existing sidebar CSS */
+
+.sidebar-logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Remove old icon styles if present */
+.sidebar-logo-icon {
+  display: none;
+}
+.sidebar-logo-text {
+  display: none;
+}

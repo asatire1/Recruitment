@@ -1,0 +1,25 @@
+/* Pending Feedback Page Styles (R10.5) */
+.pending-feedback-page { padding: 24px; }
+.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px; gap: 16px; }
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s; border: 2px solid transparent; }
+.stat-card:hover { border-color: var(--color-gray-200); }
+.stat-card.active { border-color: var(--color-primary-500); background: var(--color-primary-50); }
+.stat-card.overdue .stat-value { color: var(--color-red-600); }
+.stat-value { font-size: 32px; font-weight: 700; color: var(--color-gray-900); }
+.stat-label { font-size: 13px; color: var(--color-gray-500); margin-top: 4px; }
+.empty-state { padding: 48px; text-align: center; }
+.empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state h3 { margin: 0 0 8px; color: var(--color-gray-800); }
+.empty-state p { margin: 0; color: var(--color-gray-500); }
+.pending-list { display: flex; flex-direction: column; gap: 12px; }
+.pending-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; }
+.pending-item-left { flex: 1; min-width: 0; }
+.candidate-name { font-size: 16px; font-weight: 600; color: var(--color-gray-900); margin-bottom: 4px; }
+.interview-details { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-gray-600); flex-wrap: wrap; }
+.separator { color: var(--color-gray-300); }
+.interviewer { font-size: 12px; color: var(--color-gray-500); margin-top: 4px; }
+.pending-item-right { display: flex; align-items: center; gap: 12px; }
+.overdue-badge { padding: 4px 10px; background: var(--color-red-50); color: var(--color-red-700); border-radius: 12px; font-size: 12px; font-weight: 500; }
+.draft-badge { padding: 4px 10px; background: var(--color-amber-50); color: var(--color-amber-700); border-radius: 12px; font-size: 12px; font-weight: 500; }
+@media (max-width: 640px) { .stats-row { grid-template-columns: 1fr; } .pending-item { flex-direction: column; align-items: flex-start; gap: 12px; } .pending-item-right { width: 100%; justify-content: space-between; } }

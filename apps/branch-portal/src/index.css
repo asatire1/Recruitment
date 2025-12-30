@@ -1,0 +1,6 @@
+
+/* B4 Notification & Offline Styles - Add these imports to the end of index.css */
+@import './styles/notification-bell.css';
+@import './styles/notification-dropdown.css';
+@import './styles/push-notifications.css';
+@import './styles/offline.css';

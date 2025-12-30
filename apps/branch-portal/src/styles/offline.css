@@ -1,0 +1,246 @@
+/* ============================================================================
+   B4.6/B4.7 Offline & Sync Styles
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   Offline Banner
+   -------------------------------------------------------------------------- */
+.offline-banner {
+  position: fixed;
+  top: calc(var(--header-height) + var(--safe-area-top));
+  left: 0;
+  right: 0;
+  background: var(--color-text);
+  color: white;
+  z-index: 90;
+  animation: banner-slide-down 0.3s ease;
+}
+
+@keyframes banner-slide-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.offline-banner--online {
+  background: var(--color-success);
+}
+
+.offline-banner__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+.offline-banner__content svg {
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Offline Indicator Dot (Header)
+   -------------------------------------------------------------------------- */
+.offline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  margin-right: var(--space-sm);
+}
+
+.offline-dot--syncing {
+  background: var(--color-warning);
+  animation: dot-pulse 1s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Sync Status Indicator
+   -------------------------------------------------------------------------- */
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.sync-status--offline {
+  color: var(--color-text-muted);
+}
+
+.sync-status__time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.sync-status__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sync-status__btn:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: white;
+}
+
+.sync-status__btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sync-status__ok {
+  color: var(--color-success);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Cache Info Display
+   -------------------------------------------------------------------------- */
+.cache-info {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-md);
+}
+
+.cache-info--loading {
+  color: var(--color-text-muted);
+  text-align: center;
+  font-size: var(--font-size-sm);
+}
+
+.cache-info__row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+}
+
+.cache-info__row:not(:last-child) {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cache-info__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.cache-info__value {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.cache-info__value.online {
+  color: var(--color-success);
+}
+
+.cache-info__value.offline {
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Offline Data Indicator in Cards
+   -------------------------------------------------------------------------- */
+.data-source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--color-bg);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.data-source-badge--cached {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.data-source-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Stale Data Warning
+   -------------------------------------------------------------------------- */
+.stale-data-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-warning-light);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  color: var(--color-warning);
+  margin-bottom: var(--space-md);
+}
+
+.stale-data-warning svg {
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Spinner for sync
+   -------------------------------------------------------------------------- */
+.spinner-sm {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   App Layout Adjustments for Offline Banner
+   -------------------------------------------------------------------------- */
+.app-layout.has-offline-banner .app-main {
+  padding-top: calc(var(--space-md) + 36px);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .offline-banner__content {
+    padding: var(--space-xs) var(--space-md);
+    font-size: 12px;
+  }
+
+  .sync-status {
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,334 @@
+/* ============================================================================
+   B4.3/B4.4 Push Notification Styles
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   Push Notification Prompt Banner
+   -------------------------------------------------------------------------- */
+.push-prompt {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-area-bottom) + 16px);
+  left: 16px;
+  right: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-md);
+  z-index: 1000;
+  animation: prompt-slide-up 0.3s ease;
+}
+
+@keyframes prompt-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.push-prompt__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.push-prompt__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.push-prompt__title {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.push-prompt__message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.push-prompt__error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  margin-top: var(--space-xs);
+}
+
+.push-prompt__actions {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+  margin-top: var(--space-xs);
+}
+
+.push-prompt__btn {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.push-prompt__btn--primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.push-prompt__btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.push-prompt__btn--primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.push-prompt__btn--secondary {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.push-prompt__btn--secondary:hover:not(:disabled) {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.push-prompt__close {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.push-prompt__close:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* --------------------------------------------------------------------------
+   Push Notification Toggle (Settings)
+   -------------------------------------------------------------------------- */
+.push-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+}
+
+.push-toggle--unsupported,
+.push-toggle--denied {
+  opacity: 0.7;
+}
+
+.push-toggle__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.push-toggle__title {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.push-toggle__status {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.push-toggle__error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+}
+
+.push-toggle__switch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  background: var(--color-border);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.push-toggle__switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.push-toggle__switch.active {
+  background: var(--color-success);
+}
+
+.push-toggle__switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.push-toggle__switch.active .push-toggle__switch-thumb {
+  transform: translateX(22px);
+}
+
+/* --------------------------------------------------------------------------
+   In-App Toast for Foreground Notifications
+   -------------------------------------------------------------------------- */
+.notification-toast {
+  position: fixed;
+  top: calc(var(--header-height) + var(--safe-area-top) + 16px);
+  left: 16px;
+  right: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  z-index: 1100;
+  animation: toast-slide-down 0.3s ease;
+  cursor: pointer;
+}
+
+@keyframes toast-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-toast--exit {
+  animation: toast-slide-up 0.2s ease forwards;
+}
+
+@keyframes toast-slide-up {
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.notification-toast__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-toast__icon--trial {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.notification-toast__icon--feedback {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.notification-toast__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-toast__title {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.notification-toast__body {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.notification-toast__close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-toast__close:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .push-prompt {
+    left: 12px;
+    right: 12px;
+  }
+
+  .push-prompt__icon {
+    display: none;
+  }
+
+  .notification-toast {
+    left: 12px;
+    right: 12px;
+  }
+}

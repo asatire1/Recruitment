@@ -1,0 +1,350 @@
+/* ============================================================================
+   B4.2 Notification Dropdown Styles
+   Add to index.css after notification bell styles
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   Notification Dropdown Container
+   -------------------------------------------------------------------------- */
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  max-height: 480px;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 100;
+  animation: dropdown-slide 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes dropdown-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Dropdown Header
+   -------------------------------------------------------------------------- */
+.notification-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.dropdown-title {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.mark-all-btn {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius);
+  transition: background 0.15s ease;
+}
+
+.mark-all-btn:hover {
+  background: var(--color-primary-light);
+}
+
+.mark-all-btn:active {
+  opacity: 0.8;
+}
+
+/* --------------------------------------------------------------------------
+   Dropdown Content
+   -------------------------------------------------------------------------- */
+.notification-dropdown-content {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Loading State */
+.notification-dropdown-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  gap: var(--space-sm);
+  color: var(--color-text-secondary);
+}
+
+.notification-dropdown-loading .spinner-sm {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error State */
+.notification-dropdown-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  gap: var(--space-sm);
+  color: var(--color-error);
+  text-align: center;
+}
+
+/* Empty State */
+.notification-dropdown-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-lg);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.notification-dropdown-empty svg {
+  margin-bottom: var(--space-md);
+  color: var(--color-text-muted);
+}
+
+.notification-dropdown-empty p {
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  margin-bottom: var(--space-xs);
+  color: var(--color-text);
+}
+
+.notification-dropdown-empty .text-muted {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Notification List
+   -------------------------------------------------------------------------- */
+.notification-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --------------------------------------------------------------------------
+   Notification Item
+   -------------------------------------------------------------------------- */
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: var(--color-bg);
+}
+
+.notification-item:active {
+  background: var(--color-border);
+}
+
+/* Unread state */
+.notification-item--unread {
+  background: var(--color-primary-light);
+}
+
+.notification-item--unread:hover {
+  background: #d4e6f7;
+}
+
+/* --------------------------------------------------------------------------
+   Notification Item Icon
+   -------------------------------------------------------------------------- */
+.notification-item-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+}
+
+/* Icon colors by type */
+.notification-item-icon--trial_scheduled {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.notification-item-icon--interview_scheduled {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.notification-item-icon--feedback_required {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.notification-item-icon--feedback_submitted {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.notification-item-icon--candidate_status_change {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.notification-item-icon--system {
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Notification Item Content
+   -------------------------------------------------------------------------- */
+.notification-item-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notification-item-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notification-item-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notification-item-time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Unread Indicator Dot
+   -------------------------------------------------------------------------- */
+.notification-item-unread {
+  position: absolute;
+  top: 50%;
+  right: var(--space-md);
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Dropdown Footer
+   -------------------------------------------------------------------------- */
+.notification-dropdown-footer {
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.notification-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive - Mobile
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .notification-dropdown {
+    position: fixed;
+    top: calc(var(--header-height) + var(--safe-area-top));
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - var(--header-height) - var(--nav-height) - var(--safe-area-top) - var(--safe-area-bottom) - 32px);
+  }
+
+  .notification-item {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .notification-item-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .notification-item-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Scrollbar Styling
+   -------------------------------------------------------------------------- */
+.notification-dropdown-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-dropdown-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notification-dropdown-content::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.notification-dropdown-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}

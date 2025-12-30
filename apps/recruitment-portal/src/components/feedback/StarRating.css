@@ -1,0 +1,140 @@
+/* ============================================================================
+ * Allied Recruitment Portal - Star Rating Styles (R10.2)
+ * Location: apps/recruitment-portal/src/components/feedback/StarRating.css
+ * ============================================================================ */
+
+.star-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.stars-container {
+  display: flex;
+  gap: 2px;
+}
+
+/* Star Button */
+.star-button {
+  padding: 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-gray-300);
+  transition: transform 0.1s, color 0.15s;
+}
+
+.star-button:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.star-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.star-button.filled,
+.star-button.hovered {
+  color: #fbbf24; /* amber-400 */
+}
+
+.star-button.hovered:not(.filled) {
+  color: #fcd34d; /* amber-300 */
+}
+
+.star-button svg {
+  display: block;
+}
+
+/* Star Icon (read-only) */
+.star-icon {
+  color: var(--color-gray-300);
+}
+
+.star-icon.filled {
+  color: #fbbf24;
+}
+
+.star-icon svg {
+  display: block;
+}
+
+/* Sizes */
+.star-rating-sm .star-button svg,
+.star-rating-sm .star-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.star-rating-md .star-button svg,
+.star-rating-md .star-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.star-rating-lg .star-button svg,
+.star-rating-lg .star-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Value Display */
+.star-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  min-width: 36px;
+}
+
+.star-rating-sm .star-value {
+  font-size: 12px;
+  min-width: 28px;
+}
+
+.star-rating-lg .star-value {
+  font-size: 16px;
+  min-width: 44px;
+}
+
+/* Tooltip */
+.star-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 12px;
+  background: var(--color-gray-900);
+  color: white;
+  font-size: 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 100;
+  animation: fadeIn 0.15s ease;
+}
+
+.star-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--color-gray-900);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Read-only display styling */
+.star-display .stars-container {
+  pointer-events: none;
+}

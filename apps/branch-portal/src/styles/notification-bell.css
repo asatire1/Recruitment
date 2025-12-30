@@ -1,0 +1,176 @@
+/* ============================================================================
+   B4.1 Notification Bell Styles
+   Add to index.css after user menu styles
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   Notification Bell Button
+   -------------------------------------------------------------------------- */
+.notification-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.notification-bell:hover,
+.notification-bell:focus {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  outline: none;
+}
+
+.notification-bell.active {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.notification-bell .bell-icon {
+  transition: transform 0.2s ease;
+}
+
+.notification-bell:hover .bell-icon {
+  transform: rotate(15deg);
+}
+
+/* --------------------------------------------------------------------------
+   Notification Badge (Unread Count)
+   -------------------------------------------------------------------------- */
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  color: white;
+  background: var(--color-error);
+  border-radius: 9px;
+  border: 2px solid var(--color-surface);
+  animation: badge-pop 0.3s ease;
+}
+
+@keyframes badge-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Pulse animation when there are unread notifications */
+.notification-bell:not(.active) .notification-badge {
+  animation: badge-pop 0.3s ease, badge-pulse 2s ease-in-out infinite 0.3s;
+}
+
+@keyframes badge-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Notification Dropdown (placeholder for B4.2)
+   -------------------------------------------------------------------------- */
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 100;
+  animation: dropdown-slide 0.2s ease;
+}
+
+@keyframes dropdown-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+}
+
+.notification-dropdown-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.notification-dropdown-empty svg {
+  margin-bottom: var(--space-md);
+  color: var(--color-text-muted);
+}
+
+.notification-dropdown-empty p {
+  font-size: var(--font-size-md);
+  margin-bottom: var(--space-xs);
+}
+
+.notification-dropdown-empty .text-muted {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Header Layout Updates for Bell
+   -------------------------------------------------------------------------- */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive adjustments
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .notification-dropdown {
+    position: fixed;
+    top: calc(var(--header-height) + var(--safe-area-top));
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: none;
+  }
+}

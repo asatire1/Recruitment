@@ -1,0 +1,408 @@
+/* ============================================================================
+   Allied Recruitment Portal - Accessibility & Mobile Responsive CSS (R11.6 + R11.7)
+   Location: apps/recruitment-portal/src/styles/accessibility.css
+   ============================================================================ */
+
+/* ============================================================================
+   ACCESSIBILITY (R11.6)
+   ============================================================================ */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip to content link */
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  background: var(--color-primary-600);
+  color: white;
+  font-weight: 500;
+  border-radius: 0 0 8px 8px;
+  z-index: 9999;
+  transition: top 0.2s ease;
+}
+
+.skip-to-content:focus {
+  top: 0;
+  outline: 2px solid var(--color-primary-300);
+  outline-offset: 2px;
+}
+
+/* Focus visible - only show outlines for keyboard navigation */
+body:not(.focus-visible) *:focus {
+  outline: none;
+}
+
+body.focus-visible *:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Ensure buttons and links have adequate touch targets (44x44 min) */
+button,
+a,
+input[type="checkbox"],
+input[type="radio"],
+select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Exception for inline links */
+p a,
+span a,
+li a {
+  min-height: auto;
+  min-width: auto;
+}
+
+/* Focus styles for all interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-primary-600: #0052cc;
+    --color-gray-600: #333;
+    --color-gray-500: #444;
+  }
+  
+  button,
+  input,
+  select,
+  textarea {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Color contrast - ensure text meets WCAG AA */
+.text-muted {
+  color: var(--color-gray-600); /* 4.5:1 contrast ratio minimum */
+}
+
+/* ============================================================================
+   MOBILE RESPONSIVENESS (R11.7)
+   ============================================================================ */
+
+/* Base responsive variables */
+:root {
+  --sidebar-width: 260px;
+  --header-height: 64px;
+  --content-padding: 24px;
+  --card-padding: 20px;
+  --grid-gap: 24px;
+}
+
+/* Mobile variables */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 100%;
+    --header-height: 56px;
+    --content-padding: 16px;
+    --card-padding: 16px;
+    --grid-gap: 16px;
+  }
+}
+
+/* Container responsive padding */
+.page {
+  padding: var(--content-padding);
+}
+
+/* Responsive grid layouts */
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--grid-gap);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--grid-gap);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--grid-gap);
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--grid-gap);
+}
+
+@media (max-width: 1024px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive typography */
+.page-title {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.page-description {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+/* Responsive tables */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Stack table on mobile */
+@media (max-width: 768px) {
+  .table-stack-mobile thead {
+    display: none;
+  }
+  
+  .table-stack-mobile tbody tr {
+    display: block;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--color-gray-200);
+  }
+  
+  .table-stack-mobile tbody td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid var(--color-gray-100);
+  }
+  
+  .table-stack-mobile tbody td:last-child {
+    border-bottom: none;
+  }
+  
+  .table-stack-mobile tbody td::before {
+    content: attr(data-label);
+    font-weight: 500;
+    color: var(--color-gray-600);
+  }
+}
+
+/* Responsive modals */
+.modal {
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+}
+
+@media (max-width: 640px) {
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    margin: 0;
+  }
+  
+  .modal-fullscreen-mobile {
+    position: fixed;
+    inset: 0;
+    border-radius: 0;
+  }
+}
+
+/* Responsive buttons */
+.btn-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .btn-group {
+    flex-direction: column;
+  }
+  
+  .btn-group button {
+    width: 100%;
+  }
+}
+
+/* Responsive form layouts */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Hide on mobile/desktop utilities */
+.hide-mobile {
+  display: block;
+}
+
+.show-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  .show-mobile {
+    display: block !important;
+  }
+}
+
+/* Responsive spacing utilities */
+.mb-responsive {
+  margin-bottom: var(--grid-gap);
+}
+
+.p-responsive {
+  padding: var(--content-padding);
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase tap targets on touch devices */
+  .tap-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Remove hover states on touch devices */
+  button:hover,
+  a:hover {
+    opacity: 1;
+  }
+}
+
+/* Safe area padding for notched devices */
+@supports (padding: max(0px)) {
+  .safe-area-padding {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Responsive header */
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .page-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+/* Responsive filters bar */
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filters-bar > * {
+    width: 100%;
+  }
+}
+
+/* Responsive cards */
+.card {
+  padding: var(--card-padding);
+}
+
+/* Responsive sidebar (handled in AppLayout but utilities here) */
+@media (max-width: 1024px) {
+  .sidebar-push {
+    margin-left: 0;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .sidebar,
+  .header,
+  .btn-group {
+    display: none !important;
+  }
+  
+  .page {
+    padding: 0;
+  }
+  
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}

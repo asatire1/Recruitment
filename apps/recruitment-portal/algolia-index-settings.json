@@ -1,0 +1,110 @@
+{
+  "indexName": "candidates",
+  "description": "Allied Recruitment Portal - Candidate Search Index",
+  "settings": {
+    "searchableAttributes": [
+      "firstName,lastName",
+      "fullName",
+      "email",
+      "phone,phoneNormalized",
+      "jobTitle",
+      "branchName",
+      "unordered(cvText)",
+      "unordered(skills)",
+      "unordered(parsedQualifications)",
+      "unordered(notes)"
+    ],
+    "attributesForFaceting": [
+      "filterOnly(objectID)",
+      "searchable(status)",
+      "searchable(jobTitle)",
+      "searchable(branchId)",
+      "searchable(branchName)",
+      "filterOnly(hasCV)",
+      "filterOnly(pharmacyExperience)",
+      "filterOnly(rightToWork)"
+    ],
+    "customRanking": [
+      "desc(updatedAt)",
+      "desc(createdAt)"
+    ],
+    "ranking": [
+      "typo",
+      "geo",
+      "words",
+      "filters",
+      "proximity",
+      "attribute",
+      "exact",
+      "custom"
+    ],
+    "typoTolerance": true,
+    "minWordSizefor1Typo": 3,
+    "minWordSizefor2Typos": 7,
+    "allowTyposOnNumericTokens": false,
+    "ignorePlurals": true,
+    "advancedSyntax": true,
+    "removeStopWords": true,
+    "queryLanguages": ["en"],
+    "indexLanguages": ["en"],
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>",
+    "hitsPerPage": 20,
+    "paginationLimitedTo": 1000,
+    "attributesToSnippet": [
+      "cvText:50"
+    ],
+    "snippetEllipsisText": "...",
+    "attributesToRetrieve": [
+      "objectID",
+      "firstName",
+      "lastName",
+      "fullName",
+      "email",
+      "phone",
+      "jobId",
+      "jobTitle",
+      "branchId",
+      "branchName",
+      "status",
+      "statusLabel",
+      "source",
+      "skills",
+      "parsedQualifications",
+      "yearsExperience",
+      "pharmacyExperience",
+      "rightToWork",
+      "hasCV",
+      "createdAt",
+      "updatedAt"
+    ],
+    "unretrievableAttributes": [
+      "cvText"
+    ],
+    "camelCaseAttributes": [
+      "firstName",
+      "lastName",
+      "jobTitle",
+      "branchName"
+    ]
+  },
+  "notes": {
+    "searchableAttributes": "Ordered by importance - name/email/phone first, then job details, then CV content (unordered for broad matching)",
+    "attributesForFaceting": "Used for filtering. 'searchable' allows filtering and searching within facet values",
+    "customRanking": "Most recently updated candidates appear first",
+    "unretrievableAttributes": "cvText is searchable but not returned in results (too large)",
+    "typoTolerance": "Enabled with standard settings - 1 typo for 3+ char words, 2 typos for 7+ char words"
+  },
+  "setupInstructions": [
+    "1. Create an Algolia account at https://www.algolia.com",
+    "2. Create a new application (e.g., 'allied-recruitment')",
+    "3. Create an index named 'candidates'",
+    "4. Go to Configuration > Searchable attributes and add attributes in order shown above",
+    "5. Go to Configuration > Facets and add attributes for filtering",
+    "6. Go to Configuration > Ranking and Sorting to set custom ranking",
+    "7. Copy API keys (App ID, Search-Only Key, Admin Key)",
+    "8. Add Admin Key to Firebase Functions secrets",
+    "9. Add App ID and Search Key to frontend .env file",
+    "10. Deploy Cloud Functions and run reindexAllCandidates"
+  ]
+}

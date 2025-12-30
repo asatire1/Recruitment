@@ -1,0 +1,20 @@
+{
+  "projects": {
+    "default": "recruitment-633bd"
+  },
+  "targets": {
+    "recruitment-633bd": {
+      "hosting": {
+        "recruitment": [
+          "allied-recruitment"
+        ],
+        "branch": [
+          "allied-branch"
+        ],
+        "booking": [
+          "allied-booking"
+        ]
+      }
+    }
+  }
+}
