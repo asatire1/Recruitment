@@ -11,7 +11,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import * as admin from 'firebase-admin'
 import * as crypto from 'crypto'
-import { createTeamsMeeting, msClientId, msClientSecret, msTenantId, msOrganizerUserId, TeamsMeetingResult } from './teamsMeeting'
+import { createTeamsMeeting, sendConfirmationEmail, msClientId, msClientSecret, msTenantId, msOrganizerUserId, TeamsMeetingResult } from './teamsMeeting'
 
 const db = admin.firestore()
 
@@ -476,12 +476,49 @@ export const submitBooking = onCall<{ token: string; date: string; time: string 
       console.log(`Teams meeting URL: ${teamsMeetingResult.joinUrl}`)
     }
     
+    // =========================================================================
+    // SEND EMAIL CONFIRMATION TO CANDIDATE
+    // =========================================================================
+    let emailSent = false
+    
+    if (linkData.candidateEmail) {
+      console.log(`Sending confirmation email to: ${linkData.candidateEmail}`)
+      
+      const emailResult = await sendConfirmationEmail(
+        linkData.candidateEmail,
+        linkData.candidateName,
+        scheduledDate,
+        linkData.type,
+        teamsMeetingResult?.joinUrl || undefined,
+        linkData.jobTitle || undefined,
+        linkData.branchName || undefined,
+        confirmationCode,
+        duration
+      )
+      
+      emailSent = emailResult.success
+      
+      if (emailResult.success) {
+        console.log('Confirmation email sent successfully')
+        // Update interview record with email status
+        await interviewRef.update({
+          emailConfirmationSent: true,
+          emailConfirmationSentAt: admin.firestore.FieldValue.serverTimestamp()
+        })
+      } else {
+        console.warn('Failed to send confirmation email:', emailResult.error)
+      }
+    } else {
+      console.log('No candidate email available, skipping email confirmation')
+    }
+    
     return {
       success: true,
       interviewId: interviewRef.id,
       confirmationCode,
       // Include Teams link in response so booking confirmation page can show it
       teamsJoinUrl: teamsMeetingResult?.joinUrl || null,
+      emailSent,
     }
   }
 )

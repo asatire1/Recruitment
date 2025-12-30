@@ -416,8 +416,8 @@ service cloud.firestore {
     // SETTINGS COLLECTION
     // ============================================================
     match /settings/{settingId} {
-      // Availability settings readable by all, others restricted
-      allow read: if isActiveUser();
+      // Settings readable by all authenticated users (basic app data)
+      allow read: if isAuthenticated();
       
       // Only admins and recruiters can update settings
       allow create, update: if isRecruiterOrAdmin();
@@ -428,8 +428,8 @@ service cloud.firestore {
     // JOB TITLES COLLECTION
     // ============================================================
     match /jobTitles/{jobTitleId} {
-      // All authenticated users can read job titles
-      allow read: if isActiveUser();
+      // All authenticated users can read job titles (basic app data)
+      allow read: if isAuthenticated();
       
       // Only recruiters and admins can create/update job titles
       allow create, update: if isRecruiterOrAdmin();
@@ -439,11 +439,36 @@ service cloud.firestore {
     }
     
     // ============================================================
+    // ENTITIES COLLECTION
+    // ============================================================
+    match /entities/{entityId} {
+      // All authenticated users can read entities (basic app data)
+      allow read: if isAuthenticated();
+      
+      // Only super admins can create/update/delete entities
+      allow create, update, delete: if isSuperAdmin();
+    }
+    
+    // ============================================================
+    // JOB CATEGORIES COLLECTION
+    // ============================================================
+    match /jobCategories/{categoryId} {
+      // All authenticated users can read job categories (basic app data)
+      allow read: if isAuthenticated();
+      
+      // Only recruiters and admins can create/update job categories
+      allow create, update: if isRecruiterOrAdmin();
+      
+      // Only super admins can delete job categories
+      allow delete: if isSuperAdmin();
+    }
+    
+    // ============================================================
     // LOCATIONS COLLECTION
     // ============================================================
     match /locations/{locationId} {
-      // All authenticated users can read locations
-      allow read: if isActiveUser();
+      // All authenticated users can read locations (basic app data)
+      allow read: if isAuthenticated();
       
       // Only recruiters and admins can create/update locations
       allow create, update: if isRecruiterOrAdmin();
