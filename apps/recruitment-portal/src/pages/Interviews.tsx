@@ -316,7 +316,7 @@ export function Interviews() {
         status: 'cancelled',
         cancelledAt: serverTimestamp(),
         cancelledBy: user?.id,
-        cancellationReason: cancelReason || undefined,
+        ...(cancelReason && { cancellationReason: cancelReason }),
         updatedAt: serverTimestamp(),
       })
 

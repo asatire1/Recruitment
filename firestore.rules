@@ -245,8 +245,8 @@ service cloud.firestore {
           && data.duration is number
           && data.duration > 0
           && data.duration <= 480  // Max 8 hours
-          && data.scheduledAt is timestamp
-          && data.bookedVia in ['manual', 'self_service'];
+          && data.scheduledDate is timestamp
+          && (!('bookedVia' in data) || data.bookedVia in ['manual', 'self_service']);
       }
       
       // Validate self-service bookings from public booking page
@@ -259,7 +259,7 @@ service cloud.firestore {
           && data.duration is number
           && data.duration > 0
           && data.duration <= 480
-          && data.scheduledAt is timestamp
+          && data.scheduledDate is timestamp
           && data.bookedVia == 'self_service';
       }
       
