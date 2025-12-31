@@ -416,9 +416,26 @@ export function Candidates() {
     fetchBranches()
   }, [db])
 
-  // Filtered candidates - UPDATED: excludes rejected by default
+  // Status priority for sorting (lower number = higher priority)
+  const STATUS_PRIORITY: Record<string, number> = {
+    'new': 1,
+    'screening': 2,
+    'invite_sent': 3,
+    'interview_scheduled': 4,
+    'trial_scheduled': 5,
+    'interview_complete': 6,
+    'trial_complete': 7,
+    'approved': 8,
+    'offered': 9,
+    'hired': 10,
+    'on_hold': 11,
+    'withdrawn': 12,
+    'rejected': 13,
+  }
+
+  // Filtered candidates - UPDATED: excludes rejected by default, sorted by status priority
   const filteredCandidates = useMemo(() => {
-    return candidates.filter(candidate => {
+    const filtered = candidates.filter(candidate => {
       // Status filter with special handling for 'all' (excludes rejected) and 'all_including_rejected'
       if (statusFilter === 'all') {
         // 'all' now means "all active" - excludes rejected candidates
@@ -452,6 +469,21 @@ export function Candidates() {
       }
 
       return true
+    })
+
+    // Sort by status priority, then by date (newest first within each status)
+    return filtered.sort((a, b) => {
+      const priorityA = STATUS_PRIORITY[a.status] ?? 99
+      const priorityB = STATUS_PRIORITY[b.status] ?? 99
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB
+      }
+      
+      // Same status - sort by date (newest first)
+      const dateA = a.createdAt?.toDate?.()?.getTime() || 0
+      const dateB = b.createdAt?.toDate?.()?.getTime() || 0
+      return dateB - dateA
     })
   }, [candidates, statusFilter, searchTerm])
 
