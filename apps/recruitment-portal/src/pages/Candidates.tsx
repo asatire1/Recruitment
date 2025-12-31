@@ -22,6 +22,7 @@ import type { DuplicateMatchInfo, MergeCandidate, CombinedFieldsData } from '@al
 import { useAuth } from '../contexts/AuthContext'
 import './Candidates.css'
 import '../styles/status-colors.css'
+import '../styles/bulk-invite.css'
 import { getStatusLabel, getStatusClass } from '../utils/statusUtils'
 
 // ============================================================================
@@ -194,7 +195,7 @@ export function Candidates() {
   
   // Filters - initialize from URL params
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<CandidateStatus | 'all'>('all')
+  const [statusFilter, setStatusFilter] = useState<CandidateStatus | 'all' | 'all_including_rejected'>('all')
   
   // Selected candidate for status change
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
@@ -248,6 +249,22 @@ export function Candidates() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
+
+  // Bulk invite
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState<Set<string>>(new Set())
+  const [showBulkInviteModal, setShowBulkInviteModal] = useState(false)
+  const [bulkInviteType, setBulkInviteType] = useState<'interview' | 'trial'>('interview')
+  const [bulkInviteProcessing, setBulkInviteProcessing] = useState(false)
+  const [bulkInviteResults, setBulkInviteResults] = useState<Array<{
+    candidateId: string
+    candidateName: string
+    candidatePhone: string
+    jobTitle: string
+    branchName: string
+    success: boolean
+    bookingUrl?: string
+    error?: string
+  }>>([])
 
   const db = getFirebaseDb()
   const storage = getFirebaseStorage()
@@ -399,12 +416,23 @@ export function Candidates() {
     fetchBranches()
   }, [db])
 
-  // Filtered candidates
+  // Filtered candidates - UPDATED: excludes rejected by default
   const filteredCandidates = useMemo(() => {
     return candidates.filter(candidate => {
-      // Status filter
-      if (statusFilter !== 'all' && candidate.status !== statusFilter) {
-        return false
+      // Status filter with special handling for 'all' (excludes rejected) and 'all_including_rejected'
+      if (statusFilter === 'all') {
+        // 'all' now means "all active" - excludes rejected candidates
+        if (candidate.status === 'rejected') {
+          return false
+        }
+      } else if (statusFilter === 'all_including_rejected') {
+        // Show everything including rejected
+        // No status filtering needed
+      } else {
+        // Specific status filter
+        if (candidate.status !== statusFilter) {
+          return false
+        }
       }
 
       // Search filter
@@ -426,6 +454,11 @@ export function Candidates() {
       return true
     })
   }, [candidates, statusFilter, searchTerm])
+
+  // Count of rejected candidates (for showing in filter)
+  const rejectedCount = useMemo(() => {
+    return candidates.filter(c => c.status === 'rejected').length
+  }, [candidates])
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredCandidates.length / ITEMS_PER_PAGE)
@@ -1126,6 +1159,209 @@ export function Candidates() {
 
   // ==========================================================================
   // END DUPLICATE HANDLING FUNCTIONS
+  // ==========================================================================
+
+  // ==========================================================================
+  // BULK INVITE FUNCTIONS
+  // ==========================================================================
+
+  // Toggle selection for a single candidate
+  const toggleCandidateSelection = (candidateId: string) => {
+    setSelectedCandidateIds(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(candidateId)) {
+        newSet.delete(candidateId)
+      } else {
+        newSet.add(candidateId)
+      }
+      return newSet
+    })
+  }
+
+  // Select/deselect all visible candidates
+  const toggleSelectAll = () => {
+    if (selectedCandidateIds.size === paginatedCandidates.length) {
+      setSelectedCandidateIds(new Set())
+    } else {
+      setSelectedCandidateIds(new Set(paginatedCandidates.map(c => c.id)))
+    }
+  }
+
+  // Clear selection
+  const clearSelection = () => {
+    setSelectedCandidateIds(new Set())
+  }
+
+  // Get selected candidates
+  const selectedCandidates = useMemo(() => {
+    return candidates.filter(c => selectedCandidateIds.has(c.id))
+  }, [candidates, selectedCandidateIds])
+
+  // Open bulk invite modal
+  const openBulkInviteModal = (type: 'interview' | 'trial') => {
+    setBulkInviteType(type)
+    setBulkInviteResults([])
+    setShowBulkInviteModal(true)
+  }
+
+  // Process bulk invites
+  const processBulkInvites = async () => {
+    if (selectedCandidates.length === 0) return
+
+    setBulkInviteProcessing(true)
+    setBulkInviteResults([])
+
+    const results: typeof bulkInviteResults = []
+
+    for (const candidate of selectedCandidates) {
+      try {
+        // Generate a secure token
+        const token = crypto.randomUUID ? crypto.randomUUID() : 
+          `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`
+        
+        // Hash the token for storage
+        const tokenHash = await hashString(token)
+        
+        // Calculate expiry (7 days from now)
+        const expiresAt = new Date()
+        expiresAt.setDate(expiresAt.getDate() + 7)
+
+        // Create booking link document
+        const bookingLinkData = {
+          candidateId: candidate.id,
+          candidateName: `${candidate.firstName} ${candidate.lastName}`,
+          candidateEmail: candidate.email || null,
+          candidatePhone: candidate.phone || null,
+          type: bulkInviteType,
+          jobId: candidate.jobId || null,
+          jobTitle: candidate.jobTitle || null,
+          branchId: candidate.branchId || null,
+          branchName: candidate.branchName || candidate.location || null,
+          tokenHash,
+          status: 'active',
+          maxUses: 1,
+          useCount: 0,
+          expiresAt,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          createdBy: user?.id || '',
+        }
+
+        const docRef = await addDoc(collection(db, 'bookingLinks'), bookingLinkData)
+
+        // Build booking URL
+        const baseUrl = window.location.origin
+        const bookingUrl = `${baseUrl}/book/${token}`
+
+        // Update candidate status to invite_sent
+        const candidateRef = doc(db, COLLECTIONS.CANDIDATES, candidate.id)
+        await updateDoc(candidateRef, {
+          status: 'invite_sent',
+          updatedAt: serverTimestamp(),
+        })
+
+        // Log activity
+        await logActivity(
+          candidate.id,
+          'status_changed',
+          `${bulkInviteType === 'interview' ? 'Interview' : 'Trial'} booking link sent (bulk invite)`,
+          { status: candidate.status },
+          { status: 'invite_sent', bookingLinkId: docRef.id }
+        )
+
+        // Update local candidate state
+        setCandidates(prev => prev.map(c => 
+          c.id === candidate.id ? { ...c, status: 'invite_sent' as CandidateStatus } : c
+        ))
+
+        results.push({
+          candidateId: candidate.id,
+          candidateName: `${candidate.firstName} ${candidate.lastName}`,
+          candidatePhone: candidate.phone || '',
+          jobTitle: candidate.jobTitle || '-',
+          branchName: candidate.branchName || candidate.location || '-',
+          success: true,
+          bookingUrl,
+        })
+
+      } catch (err: any) {
+        console.error(`Error creating booking link for ${candidate.firstName} ${candidate.lastName}:`, err)
+        results.push({
+          candidateId: candidate.id,
+          candidateName: `${candidate.firstName} ${candidate.lastName}`,
+          candidatePhone: candidate.phone || '',
+          jobTitle: candidate.jobTitle || '-',
+          branchName: candidate.branchName || candidate.location || '-',
+          success: false,
+          error: err.message || 'Failed to create booking link',
+        })
+      }
+
+      // Update results as we go
+      setBulkInviteResults([...results])
+    }
+
+    setBulkInviteProcessing(false)
+    clearSelection()
+  }
+
+  // Simple string hash function for token
+  const hashString = async (str: string): Promise<string> => {
+    const encoder = new TextEncoder()
+    const data = encoder.encode(str)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  }
+
+  // Generate WhatsApp message
+  const getWhatsAppMessage = (candidateName: string, bookingUrl: string, type: 'interview' | 'trial') => {
+    const firstName = candidateName.split(' ')[0]
+    if (type === 'interview') {
+      return `Hi ${firstName}, thank you for your application to Allied Pharmacies! We'd like to invite you for an interview. Please book a convenient time using this link: ${bookingUrl}`
+    } else {
+      return `Hi ${firstName}, following your interview with Allied Pharmacies, we'd like to invite you for a trial shift. Please book a convenient time using this link: ${bookingUrl}`
+    }
+  }
+
+  // Open WhatsApp with pre-filled message
+  const openWhatsApp = (phone: string, message: string) => {
+    // Format phone for WhatsApp (remove spaces, ensure country code)
+    let formattedPhone = phone.replace(/\s/g, '').replace(/[^\d+]/g, '')
+    
+    // If UK number starting with 0, convert to +44
+    if (formattedPhone.startsWith('0')) {
+      formattedPhone = '44' + formattedPhone.substring(1)
+    }
+    // If doesn't start with +, assume it needs country code
+    if (!formattedPhone.startsWith('+') && !formattedPhone.startsWith('44')) {
+      formattedPhone = '44' + formattedPhone
+    }
+    // Remove + for WhatsApp URL
+    formattedPhone = formattedPhone.replace('+', '')
+
+    const encodedMessage = encodeURIComponent(message)
+    window.open(`https://wa.me/${formattedPhone}?text=${encodedMessage}`, '_blank')
+  }
+
+  // Copy booking link to clipboard
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      alert('Link copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  // Close bulk invite modal
+  const closeBulkInviteModal = () => {
+    setShowBulkInviteModal(false)
+    setBulkInviteResults([])
+  }
+
+  // ==========================================================================
+  // END BULK INVITE FUNCTIONS
   // ==========================================================================
 
   // Handle CV file selection in Add modal
@@ -1859,7 +2095,12 @@ export function Candidates() {
       <div className="candidates-header">
         <div className="header-title">
           <h1>Candidates</h1>
-          <span className="candidate-count">{filteredCandidates.length} candidates</span>
+          <span className="candidate-count">
+            {filteredCandidates.length} candidates
+            {statusFilter === 'all' && rejectedCount > 0 && (
+              <span className="rejected-note"> ({rejectedCount} rejected hidden)</span>
+            )}
+          </span>
         </div>
         <div className="header-actions">
           <Button variant="outline" onClick={() => setShowBulkModal(true)}>
@@ -1911,7 +2152,7 @@ export function Candidates() {
             )}
             {statusFilter !== 'all' && (
               <span className="filter-tag">
-                Status: {statusFilter.replace(/_/g, ' ')}
+                Status: {statusFilter === 'all_including_rejected' ? 'All (incl. Rejected)' : statusFilter.replace(/_/g, ' ')}
                 <button onClick={() => setStatusFilter('all')}>×</button>
               </span>
             )}
@@ -1924,6 +2165,36 @@ export function Candidates() {
           </div>
         )}
       </Card>
+
+      {/* Bulk Actions Bar */}
+      {selectedCandidateIds.size > 0 && (
+        <div className="bulk-actions-bar">
+          <div className="bulk-actions-info">
+            <span className="selected-count">
+              {selectedCandidateIds.size} candidate{selectedCandidateIds.size !== 1 ? 's' : ''} selected
+            </span>
+            <button className="clear-selection-btn" onClick={clearSelection}>
+              Clear selection
+            </button>
+          </div>
+          <div className="bulk-actions-buttons">
+            <Button 
+              variant="primary" 
+              size="sm"
+              onClick={() => openBulkInviteModal('interview')}
+            >
+              📅 Send Interview Invites
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => openBulkInviteModal('trial')}
+            >
+              🏥 Send Trial Invites
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Candidates Table */}
       <Card className="candidates-table-card">
@@ -1945,6 +2216,14 @@ export function Candidates() {
               <table className="candidates-table">
                 <thead>
                   <tr>
+                    <th className="checkbox-col">
+                      <input 
+                        type="checkbox"
+                        checked={paginatedCandidates.length > 0 && selectedCandidateIds.size === paginatedCandidates.length}
+                        onChange={toggleSelectAll}
+                        title="Select all on this page"
+                      />
+                    </th>
                     <th>Name</th>
                     <th>Contact</th>
                     <th>Job</th>
@@ -1955,7 +2234,18 @@ export function Candidates() {
                 </thead>
                 <tbody>
                   {paginatedCandidates.map(candidate => (
-                    <tr key={candidate.id} className="clickable-row" onClick={() => navigate(`/candidates/${candidate.id}`)}>
+                    <tr 
+                      key={candidate.id} 
+                      className={`clickable-row ${selectedCandidateIds.has(candidate.id) ? 'selected-row' : ''}`}
+                      onClick={() => navigate(`/candidates/${candidate.id}`)}
+                    >
+                      <td className="checkbox-col" onClick={(e) => e.stopPropagation()}>
+                        <input 
+                          type="checkbox"
+                          checked={selectedCandidateIds.has(candidate.id)}
+                          onChange={() => toggleCandidateSelection(candidate.id)}
+                        />
+                      </td>
                       <td>
                         <div className="candidate-name-cell">
                           <span className="name clickable">{candidate.firstName} {candidate.lastName}</span>
@@ -2430,6 +2720,130 @@ export function Candidates() {
           loading={merging}
         />
       )}
+
+      {/* Bulk Invite Modal */}
+      <Modal
+        isOpen={showBulkInviteModal}
+        onClose={closeBulkInviteModal}
+        title={`Send ${bulkInviteType === 'interview' ? 'Interview' : 'Trial'} Invites`}
+        size="lg"
+      >
+        <div className="bulk-invite-modal">
+          {!bulkInviteProcessing && bulkInviteResults.length === 0 && (
+            <>
+              <div className="bulk-invite-summary">
+                <p>
+                  You're about to send <strong>{bulkInviteType}</strong> booking links to{' '}
+                  <strong>{selectedCandidates.length} candidate{selectedCandidates.length !== 1 ? 's' : ''}</strong>:
+                </p>
+                <ul className="candidate-preview-list">
+                  {selectedCandidates.slice(0, 5).map(c => (
+                    <li key={c.id}>
+                      {c.firstName} {c.lastName} - {c.jobTitle || 'No job'} 
+                      {c.phone ? ` (${formatPhone(c.phone)})` : ' (No phone)'}
+                    </li>
+                  ))}
+                  {selectedCandidates.length > 5 && (
+                    <li className="more-candidates">...and {selectedCandidates.length - 5} more</li>
+                  )}
+                </ul>
+              </div>
+              <div className="bulk-invite-warning">
+                <p>⚠️ This will:</p>
+                <ul>
+                  <li>Create individual booking links for each candidate</li>
+                  <li>Update their status to "Invite Sent"</li>
+                  <li>Show WhatsApp buttons to send each message</li>
+                </ul>
+              </div>
+              <div className="modal-actions">
+                <Button variant="secondary" onClick={closeBulkInviteModal}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="primary" 
+                  onClick={processBulkInvites}
+                >
+                  Create {selectedCandidates.length} Booking Link{selectedCandidates.length !== 1 ? 's' : ''}
+                </Button>
+              </div>
+            </>
+          )}
+
+          {bulkInviteProcessing && (
+            <div className="bulk-invite-processing">
+              <Spinner size="lg" />
+              <p>Creating booking links... ({bulkInviteResults.length}/{selectedCandidates.length})</p>
+            </div>
+          )}
+
+          {!bulkInviteProcessing && bulkInviteResults.length > 0 && (
+            <div className="bulk-invite-results">
+              <div className="results-summary">
+                <span className="success-count">
+                  ✅ {bulkInviteResults.filter(r => r.success).length} successful
+                </span>
+                {bulkInviteResults.some(r => !r.success) && (
+                  <span className="error-count">
+                    ❌ {bulkInviteResults.filter(r => !r.success).length} failed
+                  </span>
+                )}
+              </div>
+
+              <div className="results-list">
+                {bulkInviteResults.map((result, index) => (
+                  <div 
+                    key={result.candidateId} 
+                    className={`result-item ${result.success ? 'success' : 'error'}`}
+                  >
+                    <div className="result-info">
+                      <span className="result-icon">{result.success ? '✅' : '❌'}</span>
+                      <div className="result-details">
+                        <span className="result-name">{result.candidateName}</span>
+                        <span className="result-job">{result.jobTitle} • {result.branchName}</span>
+                        {!result.success && (
+                          <span className="result-error">{result.error}</span>
+                        )}
+                      </div>
+                    </div>
+                    {result.success && result.bookingUrl && (
+                      <div className="result-actions">
+                        {result.candidatePhone ? (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => openWhatsApp(
+                              result.candidatePhone,
+                              getWhatsAppMessage(result.candidateName, result.bookingUrl!, bulkInviteType)
+                            )}
+                          >
+                            📱 WhatsApp
+                          </Button>
+                        ) : (
+                          <span className="no-phone">No phone</span>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => copyToClipboard(result.bookingUrl!)}
+                        >
+                          📋 Copy
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="modal-actions">
+                <Button variant="primary" onClick={closeBulkInviteModal}>
+                  Done
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
 
       {/* Bulk Upload Modal */}
       <Modal
