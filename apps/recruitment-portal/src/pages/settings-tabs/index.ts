@@ -4,3 +4,6 @@
 export { WhatsAppTemplatesTab } from './WhatsAppTemplatesTab'
 export { EntitiesTab } from './EntitiesTab'
 export { JobTitlesTab } from './JobTitlesTab'
+export { InterviewAvailabilityTab } from './InterviewAvailabilityTab'
+export { TrialAvailabilityTab } from './TrialAvailabilityTab'
+export { LocationsTab } from './LocationsTab'
