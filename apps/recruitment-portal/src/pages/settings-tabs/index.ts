@@ -2,3 +2,4 @@
 // Export all settings tab components from this file
 
 export { WhatsAppTemplatesTab } from './WhatsAppTemplatesTab'
+export { EntitiesTab } from './EntitiesTab'
