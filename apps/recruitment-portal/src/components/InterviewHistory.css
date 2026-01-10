@@ -1,0 +1,221 @@
+/* iOS-Style Interview History */
+
+.ios-interview-history {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ios-interview-history.loading,
+.ios-interview-history.empty {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-text {
+  color: #8E8E93;
+  font-size: 15px;
+}
+
+/* Interview Card */
+.interview-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease;
+}
+
+.interview-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.interview-card.expanded {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Card Header */
+.interview-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  cursor: pointer;
+  background: #FAFAFA;
+  transition: background 0.15s ease;
+}
+
+.interview-card-header:hover {
+  background: #F2F2F7;
+}
+
+.interview-card.expanded .interview-card-header {
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E5EA;
+}
+
+.interview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.interview-type {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1C1C1E;
+}
+
+.interview-date {
+  font-size: 14px;
+  color: #8E8E93;
+}
+
+.interview-branch {
+  font-size: 13px;
+  color: #8E8E93;
+}
+
+.interview-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+.needs-feedback {
+  font-size: 12px;
+  color: #FF9500;
+  font-weight: 500;
+}
+
+.chevron {
+  color: #C7C7CC;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.interview-card.expanded .chevron {
+  color: #007AFF;
+}
+
+/* Card Body */
+.interview-card-body {
+  padding: 16px;
+  background: #FFFFFF;
+}
+
+.detail-block {
+  margin-bottom: 16px;
+}
+
+.detail-block label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8E8E93;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.detail-block p {
+  font-size: 15px;
+  color: #1C1C1E;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Teams Link */
+.teams-link {
+  display: inline-block;
+  padding: 12px 20px;
+  background: #5B5FC7;
+  color: #FFFFFF;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  transition: background 0.2s ease;
+}
+
+.teams-link:hover {
+  background: #4A4EB5;
+  color: #FFFFFF;
+}
+
+/* Copilot Block */
+.copilot-block {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #F2F2F7;
+  border-radius: 12px;
+}
+
+/* Feedback Block */
+.feedback-block {
+  padding-top: 16px;
+  border-top: 1px solid #E5E5EA;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .interview-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .interview-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .interview-card {
+    background: #1C1C1E;
+  }
+  
+  .interview-card-header {
+    background: #2C2C2E;
+  }
+  
+  .interview-card-header:hover {
+    background: #3A3A3C;
+  }
+  
+  .interview-card.expanded .interview-card-header {
+    background: #1C1C1E;
+    border-color: #38383A;
+  }
+  
+  .interview-card-body {
+    background: #1C1C1E;
+  }
+  
+  .interview-type {
+    color: #FFFFFF;
+  }
+  
+  .detail-block p {
+    color: #FFFFFF;
+  }
+  
+  .copilot-block {
+    background: #2C2C2E;
+  }
+  
+  .feedback-block {
+    border-color: #38383A;
+  }
+}
